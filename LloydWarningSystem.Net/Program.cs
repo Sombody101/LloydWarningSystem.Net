@@ -9,6 +9,8 @@ internal static class Program
     {
         Logging.OverrideConsoleLogging();
 
+        // The bot has restarted itself, so wait for the previous instance
+        // to finish saving data
         if (args.Length > 0 && args[0] == Shared.PreviousInstance)
         {
             Logging.Log("Launching from previous instance : Waiting 1000ms...");
@@ -16,8 +18,10 @@ internal static class Program
             Logging.Log("Starting bot.");
         }
 
+        // Load configs and initialize the serializer
         ConfigManager.InitializeConfigs();
 
+        // On close, save files
         AppDomain.CurrentDomain.ProcessExit += (e, sender) =>
         {
             Logging.Log("Saving all configs...");
@@ -27,6 +31,7 @@ internal static class Program
             ConfigManager.SaveUserStorage();
         };
 
+        // Start the bot
         await LloydBot.StartBot();
     }
 }
