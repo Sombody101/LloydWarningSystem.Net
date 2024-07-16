@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish">
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,23 +8,29 @@
     <TransformOnBuild>true</TransformOnBuild>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
   </PropertyGroup>
-  <ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <None Include="Properties\LloydBot.Net.AssemblyInfo.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>LloydBot.Net.AssemblyInfo.tt</DependentUpon>
     </None>
   </ItemGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="&quot;$(DevEnvDir)TextTransform.exe&quot; -out &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.cs&quot; &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.tt&quot;" />
+
+  <Target Condition="'$(Configuration)' == 'Debug'" Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec
+      Command="&quot;$(DevEnvDir)TextTransform.exe&quot; -out &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.cs&quot; &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.tt&quot;" />
   </Target>
+
   <ItemGroup>
     <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02313" />
     <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02313" />
@@ -39,21 +46,26 @@
     <PackageReference Include="Spectre.Console" Version="0.49.1" />
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
+
   <ItemGroup>
     <Reference Include="Utils.Core">
       <HintPath>F:\Utils\Utils.Core\bin\Release\net7.0\Utils.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
     <None Update="Properties\LloydBot.Net.AssemblyInfo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>LloydBot.Net.AssemblyInfo.cs</LastGenOutput>
     </None>
   </ItemGroup>
+
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
+
   <ItemGroup>
     <Using Include="Utils.Logging" />
   </ItemGroup>
+
 </Project>
