@@ -1,7 +1,7 @@
 # BUILD
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
-COPY ./LloydWarningSystem.Net ./
+COPY ./LloydWarningSystem.Net/* /app
 RUN dotnet publish -c Release -o out
 
 # RUNNER IMAGE
