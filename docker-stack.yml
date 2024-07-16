@@ -3,4 +3,5 @@ services:
     build: .
     volumes:
       - ./res:/src/res
+      - ./config:/app/config
     restart: unless-stopped
