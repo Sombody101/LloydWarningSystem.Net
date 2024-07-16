@@ -1,4 +1,6 @@
-version: '3.7'
 services:
-  lloyd-bot: # Service name
-    image: mcr.microsoft.com/dotnet/runtime:8.0-aspnet-minimal
+  lloyd:
+    build: .
+    volumes:
+      - ./res:/src/res
+    restart: unless-stopped
