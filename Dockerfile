@@ -1,7 +1,8 @@
 # Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
-COPY ./LloydWarningSystem.Net ./app
+COPY ./LloydWarningSystem.Net ./
+RUN dotnet restore
 RUN dotnet publish -c Release -o lloyd-bot
 
 # Image
