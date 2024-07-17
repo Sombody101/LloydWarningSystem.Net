@@ -4,3 +4,8 @@ services:
     volumes:
       - /mnt/AppStorage/lloyd-bot/configs:/app/config # Config files
     restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
