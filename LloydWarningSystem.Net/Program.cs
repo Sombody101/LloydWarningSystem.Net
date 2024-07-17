@@ -8,6 +8,7 @@ internal static class Program
     static async Task Main(string[] args)
     {
         Logging.OverrideConsoleLogging();
+        Logging.Log($"Bot start @ {DateTime.Now}");
 
         // The bot has restarted itself, so wait for the previous instance
         // to finish saving data
@@ -24,7 +25,7 @@ internal static class Program
         // On close, save files
         AppDomain.CurrentDomain.ProcessExit += (e, sender) =>
         {
-            Logging.Log("Saving all configs...");
+            Logging.Log($"[[Exit@ {DateTime.Now} ]] Saving all configs...");
 
             // Ensure all configs are saved
             ConfigManager.SaveBotConfig().Wait();
