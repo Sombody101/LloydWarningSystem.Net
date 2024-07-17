@@ -1,5 +1,6 @@
 services:
   lloyd: # Service
+    container_name: lloyd
     build: .
     volumes:
       - /mnt/AppStorage/lloyd-bot/configs:/app/config # Config files
