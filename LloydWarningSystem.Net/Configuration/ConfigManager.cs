@@ -1,13 +1,20 @@
 ﻿using DSharpPlus.Commands;
 using Newtonsoft.Json;
 using Spectre.Console;
+using System.Runtime.CompilerServices;
 
 namespace LloydWarningSystem.Net.Configuration;
 
 internal static class ConfigManager
 {
-    private const string defaultBotConfigPath = "./configs/bot-config.json";
-    private const string defaultUserStoragePath = "./configs/user-storage.json";
+    private const string botConfigName = "bot-config.json";
+    private const string userStorageName = "user-storage.json";
+    private const string fallbackConfigFolder = "/apps/configs/";
+
+    private static string defaultConfigFolder = "./configs";
+
+    private static string botConfigPath = string.Empty;
+    private static string userStoragePath = string.Empty;
 
     private static JsonSerializer _serializer;
 
@@ -30,7 +37,17 @@ internal static class ConfigManager
     {
         _serializer = new();
 
-        Directory.CreateDirectory("./configs/");
+#if !DEBUG
+        // Check if this is the docker container
+        if (!Directory.Exists(defaultConfigFolder))
+        {
+            Logging.Log("Using base path: " + fallbackConfigFolder);
+            defaultConfigFolder = fallbackConfigFolder;
+        }
+#endif
+
+        botConfigPath = Path.Combine(defaultConfigFolder, botConfigName);
+        userStoragePath = Path.Combine(defaultConfigFolder, userStorageName);
 
         LoadBotConfig().Wait();
         LoadUserStorage().Wait();
@@ -42,7 +59,7 @@ internal static class ConfigManager
     /// <returns></returns>
     public static async Task LoadBotConfig()
     {
-        var config = await LoadConfig<BotConfigModel>(defaultBotConfigPath);
+        var config = await LoadConfig<BotConfigModel>(botConfigPath);
 
         if (Equals(config, default(BotConfigModel)))
             Environment.Exit(1);
@@ -56,9 +73,9 @@ internal static class ConfigManager
     /// <param name="path"></param>
     /// <param name="ctx"></param>
     /// <returns></returns>
-    public static async Task SaveBotConfig(string path = defaultBotConfigPath, CommandContext? ctx = null)
+    public static async Task SaveBotConfig(CommandContext? ctx = null)
     {
-        if (BotConfig == null)
+        if (BotConfig is null)
         {
             if (ctx != null)
                 await ctx.RespondAsync("Bot storage is null : Aborting save to prevent overwriting config");
@@ -70,7 +87,7 @@ internal static class ConfigManager
         if (ctx != null && !await ctx.UserIsAdmin())
             return; // Just return right away if not an admin
 
-        SaveConfig(path, BotConfig);
+        SaveConfig(botConfigPath, BotConfig);
     }
 
     /// <summary>
@@ -79,7 +96,7 @@ internal static class ConfigManager
     /// <returns></returns>
     public static async Task LoadUserStorage()
     {
-        var config = await LoadConfig<UserStorageModel>(defaultUserStoragePath);
+        var config = await LoadConfig<UserStorageModel>(userStoragePath);
 
         if (Equals(config, default(UserStorageModel)))
             Environment.Exit(1);
@@ -91,9 +108,9 @@ internal static class ConfigManager
     /// Save <see cref="UserStorage"/> to file. (Defaults to <see cref="defaultUserStoragePath"/>)
     /// </summary>
     /// <param name="path"></param>
-    public static void SaveUserStorage(string path = defaultUserStoragePath)
+    public static void SaveUserStorage()
     {
-        if (UserStorage == null)
+        if (UserStorage is null)
         {
             Logging.LogError("User storage is null : Aborting save to prevent overwriting config");
             return;
@@ -106,9 +123,7 @@ internal static class ConfigManager
         lastSaveHash = newHash;
 
         lock (UserStorage)
-        {
-            SaveConfig(path, UserStorage);
-        }
+            SaveConfig(userStoragePath, UserStorage);
     }
 
     public static void SaveConfig<ConfigType>(string path, ConfigType config)
@@ -128,7 +143,7 @@ internal static class ConfigManager
         }
     }
 
-    public static async Task<ConfigType> LoadConfig<ConfigType>(string path = defaultBotConfigPath) 
+    public static async Task<ConfigType> LoadConfig<ConfigType>(string path)
         where ConfigType : class, new()
     {
         if (!File.Exists(path))
