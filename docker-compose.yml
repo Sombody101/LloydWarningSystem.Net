@@ -1,7 +1,6 @@
 services:
-  lloyd:
+  lloyd: # Service
     build: .
     volumes:
-      - ./res:/src/res
-      - /mnt/AppStorage/lloyd-bot:/app/config
+      - /mnt/AppStorage/lloyd-bot/configs:/app/config # Config files
     restart: unless-stopped
