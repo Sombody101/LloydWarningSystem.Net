@@ -4,7 +4,7 @@ services:
     container_name: lloyd
     build: .
     volumes:
-      - /mnt/AppStorage/lloyd-bot/configs:/app/configs # Config files
+      - /mnt/AppStorage/lloyd-bot/configs/:/app/configs/ # Config files
     restart: unless-stopped
 
   # Auto updater
