@@ -9,7 +9,7 @@ internal static class ConfigManager
 {
     private const string botConfigName = "bot-config.json";
     private const string userStorageName = "user-storage.json";
-    private const string fallbackConfigFolder = "/apps/configs/";
+    private const string fallbackConfigFolder = "/app/configs/";
 
     private static string defaultConfigFolder = "./configs";
 
