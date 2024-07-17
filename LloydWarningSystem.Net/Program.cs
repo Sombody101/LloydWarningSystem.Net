@@ -11,7 +11,7 @@ internal static class Program
         Logging.Log($"Bot start @ {DateTime.Now}");
 
 #if !DEBUG
-        PrintDirectoryContents("/");
+        PrintDirectoryContents(".");
 #endif
 
         // The bot has restarted itself, so wait for the previous instance
