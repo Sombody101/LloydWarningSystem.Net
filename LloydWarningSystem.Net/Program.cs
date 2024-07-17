@@ -10,6 +10,8 @@ internal static class Program
         Logging.OverrideConsoleLogging();
         Logging.Log($"Bot start @ {DateTime.Now}");
 
+        PrintDirectoryContents(".");
+
         // The bot has restarted itself, so wait for the previous instance
         // to finish saving data
         if (args.Length > 0 && args[0] == Shared.PreviousInstance)
