@@ -10,6 +10,6 @@ FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine
 RUN apk add --no-cache icu-libs
 WORKDIR /app
 COPY --from=build /src/lloyd-bot .
-WORKDIR /config 
+COPY ./configs .
 
-ENTRYPOINT ["dotnet", "/app/LloydWarningSystem.Net.dll"]
+ENTRYPOINT ["dotnet", "LloydWarningSystem.Net.dll"]
