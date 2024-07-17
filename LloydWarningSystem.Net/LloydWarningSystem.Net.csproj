@@ -27,8 +27,7 @@
   </ItemGroup>
 
   <Target Condition="'$(Configuration)' == 'Debug'" Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec
-      Command="&quot;$(DevEnvDir)TextTransform.exe&quot; -out &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.cs&quot; &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.tt&quot;" />
+    <Exec Command="&quot;$(DevEnvDir)TextTransform.exe&quot; -out &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.cs&quot; &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.tt&quot;" />
   </Target>
 
   <ItemGroup>
@@ -44,7 +43,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="4.10.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="4.10.0" />
     <PackageReference Include="Spectre.Console" Version="0.49.1" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
