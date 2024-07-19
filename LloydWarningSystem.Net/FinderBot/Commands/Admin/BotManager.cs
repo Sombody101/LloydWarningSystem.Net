@@ -50,7 +50,7 @@ public static class BotManager
     [Command("restart"),
         Description("Restarts the bot."),
         RequireApplicationOwner]
-    public static async ValueTask RestartAsync(CommandContext ctx)
+    public static async ValueTask RestartAsync(CommandContext ctx, int exit_code = 0)
     {
         if (!await ctx.UserIsAdmin())
             return;
@@ -60,13 +60,16 @@ public static class BotManager
         await ctx.RespondAsync(embed: new DiscordEmbedBuilder()
             .WithTitle("Restarting")
             .WithColor(Shared.DefaultEmbedColor)
+            .AddField("Exit Code", exit_code.ToString())
             .AddField("Restart Location", open_path)
             .AddField("Restart Time", DateTime.Now.ToString())
             .AddField("Restart Time UTC", DateTime.UtcNow.ToString())
             .WithFooter("Restart will take ~1000ms to account for file stream exits and bot initialization.")
         );
 
-        System.Diagnostics.Process.Start(open_path, Shared.PreviousInstance);
-        Environment.Exit(0);
+        // Docker should restart Lloyd automatically
+        // System.Diagnostics.Process.Start(open_path, Shared.PreviousInstance);
+        
+        Environment.Exit(exit_code);
     }
 }
