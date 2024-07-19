@@ -67,9 +67,11 @@ public static class BotManager
             .WithFooter("Restart will take ~1000ms to account for file stream exits and bot initialization.")
         );
 
-        // Docker should restart Lloyd automatically
-        // System.Diagnostics.Process.Start(open_path, Shared.PreviousInstance);
-        
+#if DEBUG
+        // Docker should restart Lloyd automatically, so only do this when compiled as Debug
+        System.Diagnostics.Process.Start(open_path, Shared.PreviousInstance);
+#endif
+
         Environment.Exit(exit_code);
     }
 }

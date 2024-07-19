@@ -6,6 +6,9 @@ using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Entities;
 using LloydWarningSystem.Net.Configuration;
+using LloydWarningSystem.Net.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 
 namespace LloydWarningSystem.Net.FinderBot;
@@ -38,12 +41,21 @@ internal static class LloydBot
         token = config.BotToken;
 #endif
 
-
         DiscordClientBuilder builder = DiscordClientBuilder.CreateDefault(token,
             TextCommandProcessor.RequiredIntents
             | SlashCommandProcessor.RequiredIntents
             | DiscordIntents.MessageContents
-            | DiscordIntents.GuildMembers);
+            | DiscordIntents.GuildMembers).ConfigureServices((services) =>
+            {
+                services.AddDbContextFactory<LloydContext>(
+                    options =>
+                    {
+                        options.UseMySql(token,
+                            ServerVersion.AutoDetect(token));
+                        options.EnableDetailedErrors();
+                    }
+                ).AddMemoryCache();
+            });
 
         InitializeEvents(builder);
 
