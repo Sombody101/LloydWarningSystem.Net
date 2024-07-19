@@ -6,6 +6,9 @@ name: Docker
 # documentation.
 
 on:
+  push:
+    branches: [ main ] # Only when I push to the main branch (Ignore the debug branch)
+    
   schedule:
     - cron: '19 23 * * *'
   push:
