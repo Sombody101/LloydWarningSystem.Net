@@ -6,14 +6,9 @@ namespace LloydWarningSystem.Net.Configuration;
 
 internal static class ConfigManager
 {
-    private const string botConfigName = "bot-config.json";
-    private const string userStorageName = "user-storage.json";
-    private const string fallbackConfigFolder = "/app/configs/";
-
-    private static string defaultConfigFolder = "./configs";
-
-    private static string botConfigPath = string.Empty;
-    private static string userStoragePath = string.Empty;
+    private const string defaultConfigFolder = "./configs";
+    private const string botConfigPath = $"{defaultConfigFolder}/bot-config.json";
+    private const string userStoragePath = $"{defaultConfigFolder}/user-storage.json";
 
     private static JsonSerializer _serializer;
 
@@ -35,26 +30,6 @@ internal static class ConfigManager
     public static void InitializeConfigs()
     {
         _serializer = new();
-
-        foreach (var f in Directory.GetFiles("."))
-            Console.WriteLine(f);
-
-        foreach (var d in Directory.GetDirectories("."))
-            Console.WriteLine(d);
-
-#if !DEBUG
-        
-
-        // Check if this is the docker container
-        if (!Directory.Exists(defaultConfigFolder))
-        {
-            Logging.Log("Using base path: " + fallbackConfigFolder);
-            defaultConfigFolder = fallbackConfigFolder;
-        }
-#endif
-
-        botConfigPath = Path.Combine(defaultConfigFolder, botConfigName);
-        userStoragePath = Path.Combine(defaultConfigFolder, userStorageName);
 
         LoadBotConfig().Wait();
         LoadUserStorage().Wait();
