@@ -74,7 +74,7 @@ internal static class LloydBot
 #else
             Logging.LogError(e.Exception);
 #endif
-            
+
             var ex = e.Exception.InnerException ?? e.Exception;
 
             if (e.Context.User.Id == BotConfigModel.AbsoluteAdmin)
@@ -114,20 +114,21 @@ internal static class LloydBot
 
         await commandsExtension.AddProcessorsAsync(textCommandProcessor);
 
-        const string build_type =
-#if DEBUG
-            "Debug";
-#else
-            "Release";
-#endif
-
         var status = new DiscordActivity("for some bitches", DiscordActivityType.Watching);
         await client.ConnectAsync(status);
 
-        var assembly = typeof(LloydBot).Assembly;
+        try
+        {
+            var assembly = typeof(LloydBot).Assembly;
 
-        await client.SendMessageAsync(await client.GetChannelAsync(BotConfigModel.DebugChannel),
-            $"Bitch finder active. (v{assembly.GetName().Version}, {build_type}, R{assembly.ImageRuntimeVersion})");
+            await client.SendMessageAsync(await client.GetChannelAsync(BotConfigModel.DebugChannel),
+                $"Bitch finder active. (v{assembly.GetName().Version}, {Program.BuildType}, R{assembly.ImageRuntimeVersion})");
+        }
+        catch (Exception ex)
+        {
+            Logging.Log("Failed to send message to debug guild channel: " + BotConfigModel.DebugChannel);
+            AnsiConsole.WriteException(ex);
+        }
 
         await Task.Delay(-1);
     }
@@ -178,7 +179,7 @@ internal static class LloydBot
                     return; // Not in debug mode, this is the release channel
 #endif
 
-                    var message = sender.Message;
+                var message = sender.Message;
 
                 if (message.Author is not null && config.UserReactions.TryGetValue(message.Author.Id, out var emoji_id))
                 {

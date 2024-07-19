@@ -5,10 +5,24 @@ namespace LloydWarningSystem.Net;
 
 internal static class Program
 {
+    public const bool DebugBuild =
+#if DEBUG
+        true;
+#else
+        false;
+#endif
+
+    public const string BuildType =
+#if DEBUG
+            "Debug";
+#else
+            "Release";
+#endif
+
     static async Task Main(string[] args)
     {
         Logging.OverrideConsoleLogging();
-        Logging.Log($"Bot start @ {DateTime.Now}");
+        Logging.Log($"Bot start @ {DateTime.Now} ({BuildType} build)");
 
         // The bot has restarted itself, so wait for the previous instance
         // to finish saving data

@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.Commands;
 using Newtonsoft.Json;
 using Spectre.Console;
-using System.Runtime.CompilerServices;
 
 namespace LloydWarningSystem.Net.Configuration;
 
@@ -37,7 +36,15 @@ internal static class ConfigManager
     {
         _serializer = new();
 
+        foreach (var f in Directory.GetFiles("."))
+            Console.WriteLine(f);
+
+        foreach (var d in Directory.GetDirectories("."))
+            Console.WriteLine(d);
+
 #if !DEBUG
+        
+
         // Check if this is the docker container
         if (!Directory.Exists(defaultConfigFolder))
         {
