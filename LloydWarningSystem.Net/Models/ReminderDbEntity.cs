@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LloydWarningSystem.Net.Entities;
+namespace LloydWarningSystem.Net.Models;
 
 public class ReminderDbEntity
 {

@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
 
-/* Generated on Friday, July 19, 2024 01:39:50 PM */
-[assembly: AssemblyVersion("2024.07.19.1339")]
-[assembly: AssemblyFileVersion("2024.07.19.1339")]
+/* Generated on Monday, July 22, 2024 09:55:32 AM */
+[assembly: AssemblyVersion("2024.07.22.0955")]
+[assembly: AssemblyFileVersion("2024.07.22.0955")]

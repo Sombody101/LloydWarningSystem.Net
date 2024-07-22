@@ -5,7 +5,6 @@ services:
     build: .
     volumes:
       - /mnt/AppStorage/lloyd-bot/configs:/app/configs/ # Config files
-
     restart: unless-stopped
 
   # Auto updater
@@ -14,56 +13,3 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 60
-
-#     networks:
-#       - lloyd_internal:
-#         ipv4_address: 10.6.0.2
-#
-#
-#   lloyd-db-core:
-#     image: mariadb:latest
-#     environment:
-#       MYSQL_ROOT_PASSWORD: lloyd
-#       MYSQL_DATABASE: lloyd
-#       MYSQL_USER: lloyd
-#       MYSQL_PASSWORD: lloyd
-#
-#     volumes:
-#       - data_lloyd_core:/var/lib/mysql
-#
-#     networks:
-#       - lloyd_internal:
-#         ipv4_address: 10.6.0.3
-#
-#     hostname: lloyd-db-core
-#
-#     depends_on:
-#       - lloyd-db-core
-#
-#     restart: unless-stopped
-#
-#     mads-db-quartz:
-#       image: plerx2493/quartz-db-mysql:latest
-#       environment:
-#         MYSQL_ROOT_PASSWORD: quartz
-#         MYSQL_DATABASE: quartz
-#         MYSQL_USER: quartz
-#         MYSQL_PASSWORD: quartz
-#
-#       volumes:
-#         - data_mads_quartz:/var/lib/mysql
-#
-#       networks:
-#         - mads_internal:
-#           ipv4_address: 10.6.0.4
-#
-#       hostname: mads-db-quartz
-#       restart: unless-stopped
-
-# networks:
-#   lloyd_internal:
-#     driver: bridge
-#     ipam:
-#       config:
-#         - subnet: 10.6.0.0/16
-#           gateway: 10.6.0.1

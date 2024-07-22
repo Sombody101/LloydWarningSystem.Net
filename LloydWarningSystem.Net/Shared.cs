@@ -11,19 +11,6 @@ internal static class Shared
     // Runtime constants
     public static readonly DiscordColor DefaultEmbedColor = new(0xFFE4B5);
 
-    public static async Task<bool> UserIsAdmin(this CommandContext ctx)
-    {
-        var config = ConfigManager.UserStorage;
-
-        if (ctx.User.Id != BotConfigModel.AbsoluteAdmin || !config.BotAdmins.ContainsKey(ctx.User.Id))
-        {
-            await ctx.RespondAsync("This command can only be used by an admin, you faggot.");
-            return false;
-        }
-
-        return true;
-    }
-
     private static async Task ModifyOrSendErrorEmbed(CommandContext ctx, string error, DiscordMessage? message = null)
     {
         var embed = new DiscordEmbedBuilder()

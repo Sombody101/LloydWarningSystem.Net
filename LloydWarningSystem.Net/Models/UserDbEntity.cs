@@ -1,9 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel;
 
-namespace LloydWarningSystem.Net.Entities;
+namespace LloydWarningSystem.Net.Models;
 
 public class UserDbEntity
 {
@@ -13,13 +19,16 @@ public class UserDbEntity
     [Column("username")]
     public string Username { get; set; }
 
-    [Column("preferred_language")]
-    public string? PreferredLanguage { get; set; }
-
     public List<IncidentDbEntity> Incidents { get; set; }
 
     public List<ReminderDbEntity> Reminders { get; set; }
     public List<VoiceAlert> VoiceAlerts { get; set; }
+
+    /// <summary>
+    /// Can use special commands
+    /// </summary>
+    [DefaultValue(false)]
+    public bool IsBotAdmin { get; set; }
 }
 
 public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
@@ -43,5 +52,7 @@ public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(x => x.IsBotAdmin);
     }
 }

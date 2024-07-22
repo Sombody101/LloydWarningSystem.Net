@@ -77,37 +77,9 @@ public static class HelpCommand
                 embed.AddField($"{parameter.Name.Titleize()} - {context.Extension.GetProcessor<TextCommandProcessor>()
                     .Converters[GetConverterFriendlyBaseType(parameter.Type)].ReadableName}", command.Description ?? "No description provided.");
 
-            var method = command.Method;
-
-            if (method is not null)
-            {
-                embed.AddField("In Module",
-                    $"```ansi\n{Formatter.Colorize(method.ReflectedType?.Name ?? "$NO_CLASS_FOUND", AnsiColor.Blue)}\n```");
-
-                var parameters = method.GetParameters();
-                var sb = new StringBuilder();
-                foreach (var param in parameters.Where(param => param is not null))
-                    sb.Append("\n\t").Append(param.ParameterType.Name).Append(' ')
-                      .Append(param.Name).Append(", ");
-
-                embed.AddField("Method Declaration",
-                    $"```cs\npublic static async {method.ReturnType.Name} {method.Name}({sb.ToString().Trim()[0..^1]}\n)\n```");
-
-                var attributes = method.GetCustomAttributes(false);
-
-                if (attributes.Length != 0)
-                {
-                    if (attributes.Any(attr => attr.GetType() == typeof(RequireApplicationOwnerAttribute)))
-                        embed.AddField("Special Permissions: ", "Requires Bot Owner");
-
-                    sb = new StringBuilder("```ansi\n");
-                    foreach (var attribute in attributes)
-                        sb.Append(Formatter.Colorize(attribute.GetType().Name, AnsiColor.Magenta))
-                            .Append(",\n");
-
-                    embed.AddField("Attributes", $"{sb.ToString()[0..^2]}\n```");
-                }
-            }
+            if (command.Method.GetCustomAttributes(false)
+                .Any(attr => attr.GetType() == typeof(RequireApplicationOwnerAttribute)))
+                embed.AddField("Special Permissions: ", "Requires Bot Owner");
 
             embed.WithImageUrl("https://files.forsaken-borders.net/transparent.png");
             embed.WithFooter("<> = required, [] = optional");
@@ -128,8 +100,7 @@ public static class HelpCommand
                 : name[..spaceIndex];
 
             commandName = commandName.Underscore();
-            foreach (Command command in commands)
-                if (command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase))
+            foreach (Command command in commands.Where(cmd => cmd.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)))
                     return spaceIndex == -1
                         ? command
                         : GetCommand(command.Subcommands, name[(spaceIndex + 1)..]);

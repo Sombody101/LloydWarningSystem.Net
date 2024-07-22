@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DSharpPlus.Entities;
+using LloydWarningSystem.Net.FinderBot;
+using LloydWarningSystem.Net.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace LloydWarningSystem.Net.Entities;
+namespace LloydWarningSystem.Net.Context;
 
 public class LloydContext : DbContext
 {
-    public LloydContext(DbContextOptions<LloydContext> options) 
+    public LloydContext(DbContextOptions<LloydContext> options)
         : base(options)
     { }
 
@@ -16,10 +19,13 @@ public class LloydContext : DbContext
     public DbSet<QuoteDbEntity> Quotes { get; set; }
     public DbSet<ReminderDbEntity> Reminders { get; set; }
     public DbSet<VoiceAlert> VoiceAlerts { get; set; }
-
+        
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(LloydContext).Assembly);
         base.OnModelCreating(builder);
     }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+        => options.UseSqlite(LloydBot.connectionString);
 }
