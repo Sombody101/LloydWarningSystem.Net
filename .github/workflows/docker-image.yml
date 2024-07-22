@@ -5,11 +5,7 @@ name: Docker
 # separate terms of service, privacy policy, and support
 # documentation.
 
-on:
-  push:
-    # Only when I push to the main branch (Ignore the debug branch)
-    branches: [ main ] 
-    
+on:    
   schedule:
     - cron: '19 23 * * *'
   push:
