@@ -1,40 +1,115 @@
 ﻿using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
+using LloydWarningSystem.Net.CommandChecks.Attributes;
 using LloydWarningSystem.Net.Configuration;
+using LloydWarningSystem.Net.Context;
+using LloydWarningSystem.Net.Models;
 using System.ComponentModel;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands.Admin;
 
-public static class BotManager
+public class BotManager
 {
-    [Command("addadmin"),
-        Description("Adds user(s) to the bot administrators list."),
-        RequireApplicationOwner]
-    public static async Task AddAdminAsync(CommandContext ctx,
-        [Description("User(s) to add to the administrators list.")] params DiscordUser[] users)
+    private readonly LloydContext _dbContext;
+
+    public BotManager(LloydContext context)
     {
-        if (!await ctx.UserIsAdmin())
-            return;
-
-        var config = ConfigManager.UserStorage;
-
-        foreach (var user in users)
-            if (!config.BotAdmins.TryAdd(user.Id, user.Username))
-                await ctx.RespondAsync($"{user.Username} is already an administrator!");
-
-        ConfigManager.SaveUserStorage();
-        await ctx.RespondAsync($"Added {users.Length} user{'s'.Pluralize(users.Length != 1)} to the administrators list.");
+        _dbContext = context;
     }
+
+    [Command("addadmin"),
+        Description("Gives the specified user bot administrator status."),
+        RequireAdminUser]
+    public async Task AddAdminAsync(CommandContext ctx,
+        [Description("The ID of the wanted user")] ulong user_id)
+    {
+        var dis_user = await ctx.Client.GetUserAsync(user_id);
+        var db_user = await _dbContext.Users.FindAsync(user_id);
+
+        if (db_user is null)
+        {
+            var new_user = new UserDbEntity()
+            {
+                Username = dis_user.Username,
+                Id = dis_user.Id,
+                IsBotAdmin = true, // Add user as an admin
+            };
+
+            await _dbContext.Users.AddAsync(new_user);
+        }
+        else if (!db_user.IsBotAdmin)
+        {
+            db_user.IsBotAdmin = true;
+        }
+        else
+        {
+            await ctx.RespondAsync($"{dis_user.Username} is already an administrator!");
+            return;
+        }
+
+        await _dbContext.SaveChangesAsync();
+        await ctx.RespondAsync($"{dis_user.Mention} is now registered as a bot administrator.");
+    }
+
+    [Command("removeadmin"),
+        Description("Removes bot administrator status from the specified user")]
+    public async ValueTask RemoveAdminAsync(CommandContext ctx, ulong user_id)
+    {
+        var dis_user = await ctx.Client.GetUserAsync(user_id);
+        var db_user = await _dbContext.Users.FindAsync(user_id);
+
+        if (db_user is null)
+        {
+            var new_user = new UserDbEntity()
+            {
+                Username = dis_user.Username,
+                Id = dis_user.Id,
+                IsBotAdmin = false, // Set to false
+            };
+
+            await _dbContext.Users.AddAsync(new_user);
+        }
+        else if (db_user.IsBotAdmin)
+        {
+            db_user.IsBotAdmin = false;
+        }
+        else
+        {
+            await ctx.RespondAsync($"{dis_user.Username} wasn't already an administrator!");
+            return;
+        }
+
+        await _dbContext.SaveChangesAsync();
+        await ctx.RespondAsync($"{dis_user.Username} is no longer a bot administrator.");
+    }
+
+    [Command("listadmins"), RequireAdminUser]
+    public async ValueTask ListAdminsAsync(CommandContext ctx)
+    {
+        var embed = new DiscordEmbedBuilder().WithTitle("Active Administrators");
+        var admins = _dbContext.Users.Where(user => user.IsBotAdmin);
+
+        if (!admins.Any())
+        {
+            embed.AddField("There currently zero administrators", $"User count: `{_dbContext.Users.Count()}`");
+            await ctx.RespondAsync(embed);
+            return;
+        }
+
+        foreach (var user in admins)
+            embed.AddField(user.Username, user.Id.ToString());
+
+        await ctx.RespondAsync(embed);
+    }
+
+    /* Bot owner commands */
 
     [Command("addprefix"),
         Description("Adds a prefix to the bots configuration (requires restart)."),
-        RequireApplicationOwner]
-    public static async Task AddPrefixAsync(CommandContext ctx, params string[] prefixes)
+        RequireAdminUser]
+    public async Task AddPrefixAsync(CommandContext ctx, params string[] prefixes)
     {
-        if (!await ctx.UserIsAdmin())
-            return;
-
         var config = ConfigManager.BotConfig;
 
         foreach (var prefix in prefixes)
@@ -52,9 +127,6 @@ public static class BotManager
         RequireApplicationOwner]
     public static async ValueTask RestartAsync(CommandContext ctx, int exit_code = 0)
     {
-        if (!await ctx.UserIsAdmin())
-            return;
-
         var open_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName + ".exe");
 
         await ctx.RespondAsync(embed: new DiscordEmbedBuilder()

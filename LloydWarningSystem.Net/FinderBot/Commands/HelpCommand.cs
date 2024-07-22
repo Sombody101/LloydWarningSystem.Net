@@ -100,8 +100,7 @@ public static class HelpCommand
                 : name[..spaceIndex];
 
             commandName = commandName.Underscore();
-            foreach (Command command in commands)
-                if (command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase))
+            foreach (Command command in commands.Where(cmd => cmd.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)))
                     return spaceIndex == -1
                         ? command
                         : GetCommand(command.Subcommands, name[(spaceIndex + 1)..]);

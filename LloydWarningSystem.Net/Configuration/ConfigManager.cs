@@ -6,19 +6,10 @@ namespace LloydWarningSystem.Net.Configuration;
 
 internal static class ConfigManager
 {
-    private const string defaultConfigFolder = "./configs";
-    private const string botConfigPath = $"{defaultConfigFolder}/bot-config.json";
-    private const string userStoragePath = $"{defaultConfigFolder}/user-storage.json";
+    private const string botConfigPath = $"./configs/bot-config.json";
 
     private static JsonSerializer _serializer;
-
-    private static int lastSaveHash = 0;
-
-    /// <summary>
-    /// Configurations for all user based configurations
-    /// </summary>
-    public static UserStorageModel UserStorage { get; private set; }
-
+    
     /// <summary>
     /// Configurations specific to the functionality of the bot
     /// </summary>
@@ -30,9 +21,7 @@ internal static class ConfigManager
     public static void InitializeConfigs()
     {
         _serializer = new();
-
         LoadBotConfig().Wait();
-        LoadUserStorage().Wait();
     }
 
     /// <summary>
@@ -41,9 +30,9 @@ internal static class ConfigManager
     /// <returns></returns>
     public static async Task LoadBotConfig()
     {
-        var config = await LoadConfig<BotConfigModel>(botConfigPath);
+        var config = await LoadConfig(botConfigPath);
 
-        if (Equals(config, default(BotConfigModel)))
+        if (Equals(config, null))
             Environment.Exit(1);
 
         BotConfig = config;
@@ -66,49 +55,10 @@ internal static class ConfigManager
             return;
         }
 
-        if (ctx != null && !await ctx.UserIsAdmin())
-            return; // Just return right away if not an admin
-
         SaveConfig(botConfigPath, BotConfig);
     }
 
-    /// <summary>
-    /// Load <see cref="UserStorage"/> from file
-    /// </summary>
-    /// <returns></returns>
-    public static async Task LoadUserStorage()
-    {
-        var config = await LoadConfig<UserStorageModel>(userStoragePath);
-
-        if (Equals(config, default(UserStorageModel)))
-            Environment.Exit(1);
-
-        UserStorage = config;
-    }
-
-    /// <summary>
-    /// Save <see cref="UserStorage"/> to file. (Defaults to <see cref="defaultUserStoragePath"/>)
-    /// </summary>
-    /// <param name="path"></param>
-    public static void SaveUserStorage()
-    {
-        if (UserStorage is null)
-        {
-            Logging.LogError("User storage is null : Aborting save to prevent overwriting config");
-            return;
-        }
-
-        int newHash = UserStorage.GetHashCode();
-        if (newHash != lastSaveHash)
-            return;
-
-        lastSaveHash = newHash;
-
-        lock (UserStorage)
-            SaveConfig(userStoragePath, UserStorage);
-    }
-
-    public static void SaveConfig<ConfigType>(string path, ConfigType config)
+    public static void SaveConfig(string path, BotConfigModel config)
     {
         try
         {
@@ -125,24 +75,23 @@ internal static class ConfigManager
         }
     }
 
-    public static async Task<ConfigType> LoadConfig<ConfigType>(string path)
-        where ConfigType : class, new()
+    public static async Task<BotConfigModel> LoadConfig(string path)
     {
         if (!File.Exists(path))
         {
             Logging.LogError($"No config file found at '{path}'. Creating one with default values.");
             await File.WriteAllTextAsync(path, "{\n}");
-            return new ConfigType();
+            return new BotConfigModel();
         }
 
         try
         {
             using var sr = new StreamReader(path);
             using var reader = new JsonTextReader(sr);
-            ConfigType? config = _serializer.Deserialize<ConfigType>(reader);
+            BotConfigModel? config = _serializer.Deserialize<BotConfigModel>(reader);
 
-            if (Equals(config, default(ConfigType)))
-                Logging.LogError($"Failed to deserialize configuration file to type {typeof(ConfigType).Name} from: {path}");
+            if (Equals(config, null))
+                Logging.LogError($"Failed to deserialize configuration file to type {nameof(BotConfigModel)} from: {path}");
             else
                 return config;
         }

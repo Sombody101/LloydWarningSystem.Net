@@ -1,13 +1,22 @@
 ﻿using DSharpPlus.Commands;
 using DSharpPlus.Entities;
+using LloydWarningSystem.Net.Context;
+
 using System.ComponentModel;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands;
 
-public static class SizeCommand
+public class SizeCommand
 {
+    private readonly LloydContext _dbContext;
+
+    public SizeCommand(LloydContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
     [Command("dick"), Description("See how big your dick is!")]
-    public static async ValueTask DickAsync(CommandContext ctx, DiscordUser? user = null)
+    public async ValueTask DickAsync(CommandContext ctx, DiscordUser? user = null)
     {
         var length = Random.Shared.Next(0, 35);
         await ctx.RespondAsync($"8{new string('=', length / 2)}D\n{(
@@ -18,7 +27,7 @@ public static class SizeCommand
     }
 
     [Command("height"), Description("See how tall you are!")]
-    public static async ValueTask HeightAsync(CommandContext ctx, DiscordUser? user = null)
+    public async ValueTask HeightAsync(CommandContext ctx, DiscordUser? user = null)
     {
         var height = Random.Shared.Next(50, 95);
         await ctx.RespondAsync($"{(
@@ -29,7 +38,7 @@ public static class SizeCommand
     }
 
     [Command("weight"), Description("Fucking fatty.")]
-    public static async ValueTask WeightAsync(CommandContext ctx, DiscordUser? user = null)
+    public async ValueTask WeightAsync(CommandContext ctx, DiscordUser? user = null)
     {
         var weight = Random.Shared.NextDouble() * 500;
         await ctx.RespondAsync($"{(
