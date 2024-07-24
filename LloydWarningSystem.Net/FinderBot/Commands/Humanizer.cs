@@ -1,0 +1,41 @@
+﻿using DSharpPlus.Commands;
+using DSharpPlus.Commands.ArgumentModifiers;
+using DSharpPlus.Commands.Trees.Metadata;
+using DSharpPlus.Entities;
+using Humanizer;
+
+namespace LloydWarningSystem.Net.FinderBot.Commands;
+
+[Command("humanize")]
+public static class HumanizerCommand
+{
+    [DefaultGroupCommand]
+    public static async ValueTask HumanizeAsync(CommandContext ctx, [RemainingText] string text)
+    {
+        await ctx.RespondAsync(await HumanizeText(text));
+    }
+
+    [Command("title")]
+    public static async ValueTask HumanizeTitleAsync(CommandContext ctx, [RemainingText] string text)
+    {
+        await ctx.RespondAsync(await HumanizeText(text, LetterCasing.Title));
+    }
+
+    private static async ValueTask<DiscordEmbedBuilder> HumanizeText(string text, LetterCasing casing = LetterCasing.Sentence)
+    {
+        try
+        {
+            var embed = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.SpringGreen)
+                .AddField("Humanized Text", $"```\n{text.Humanize(casing)}\n```");
+
+            return embed;
+        }
+        catch (Exception e)
+        {
+            return new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.Red)
+                .AddField("Error while humanizing text!", e.Message);
+        }
+    }
+}

@@ -17,7 +17,6 @@ internal class LloydBot
     public const string connectionString = "Data Source=./configs/lloyd-bot.db";
 
     public static IServiceProvider Services;
-
     public static Stopwatch startWatch;
 
     public async Task RunAsync()
@@ -26,25 +25,19 @@ internal class LloydBot
 
         var config = ConfigManager.BotConfig;
 
-        string token;
+        string token = Program.DebugBuild
+            ? config.DebugBotToken
+            : config.BotToken;
 
+        if (string.IsNullOrWhiteSpace(token))
+        {
 #if DEBUG
-        if (string.IsNullOrWhiteSpace(config.DebugBotToken))
-        {
-            Logging.LogError($"No bot debug token provided. {config.DebugBotToken}");
-            Environment.Exit(1);
-        }
-
-        token = config.DebugBotToken;
+            Logging.LogError($"No bot debug token provided. {token}");
 #else
-        if (string.IsNullOrWhiteSpace(config.BotToken))
-        {
-            Logging.LogError($"No bot token provided. {config.BotToken}");
+            Logging.LogError($"No bot token provided. {token}");
+#endif
             Environment.Exit(1);
         }
-
-        token = config.BotToken;
-#endif
 
         await Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
@@ -54,19 +47,31 @@ internal class LloydBot
                         | SlashCommandProcessor.RequiredIntents
                         | DiscordIntents.MessageContents
                         | DiscordIntents.GuildMembers)
-                    .ConfigureEventHandlers(builder =>
-                    {
-                        InitializeEvents(builder);
-                    })
                     .AddSingleton<DiscordCommandService>()
                     .AddHostedService(s => s.GetRequiredService<DiscordCommandService>())
                     .AddDbContextFactory<LloydContext>(
                         options =>
                         {
+                            Logging.Log("Adding SQLite DB service");
                             options.UseSqlite(connectionString);
                             options.EnableDetailedErrors();
                         }
-                    );
+                    )
+                    .AddEasyCaching(options =>
+                    {
+                        Logging.Log("Adding SQLite DB cache service");
+                        options.UseSQLite(config =>
+                        {
+                            config.DBConfig = new()
+                            {
+                                FilePath = "./configs/lloyd-db-cache.db",
+                            };
+                        });
+                    })
+                    .ConfigureEventHandlers(builder =>
+                    {
+                        InitializeEvents(builder);
+                    });
 
                 Services = services.BuildServiceProvider();
             })
@@ -79,6 +84,8 @@ internal class LloydBot
     /// <param name="client"></param>
     private static void InitializeEvents(EventHandlingBuilder cfg)
     {
+        // var dbContextFactory = Services.GetRequiredService<IDbContextFactory<LloydContext>>(); // Assuming service is registered
+
         cfg.HandleGuildMemberAdded(async (client, sender) =>
         {
         });
@@ -105,15 +112,26 @@ internal class LloydBot
 
             var message = sender.Message;
 
-            // if (message.Author is not null && config.UserReactions.TryGetValue(message.Author.Id, out var emoji_id))
+            if (message.Author is null)
+                return;
+
+            //using var db = dbContextFactory.CreateDbContext();
+            //var user = await db.Users.FindAsync(message.Author.Id);
+            //if (user is null)
+            //    // User is not in DB
+            //    return;
+            //var emoji_str = user.ReactionEmoji;
+            // if (emoji_str is not null)
             // {
-            //     Logging.Log("Using emoji: " + emoji_id.EscapeMarkup());
             //     try
             //     {
-            //         if (!DiscordEmoji.TryFromName(client, emoji_id, out var emoji))
+            //         if (!DiscordEmoji.TryFromName(client, emoji_str, out var emoji))
+            //         {
             //             Logging.LogError("Failed to locate emoji");
-            //         else
-            //             await message.CreateReactionAsync(emoji);
+            //             return;
+            //         }
+            // 
+            //         await message.CreateReactionAsync(emoji);
             //     }
             //     catch (Exception ex)
             //     {

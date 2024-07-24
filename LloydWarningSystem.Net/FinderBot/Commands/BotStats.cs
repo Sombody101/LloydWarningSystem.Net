@@ -21,14 +21,12 @@ public class BotStats
     [Command("botstats"), Description("Get statistics about the bot")]
     public async Task GetBotStatsAsync(CommandContext ctx)
     {
-        Stopwatch swDb = new();
-
         _ = await _dbContext.Users.FirstOrDefaultAsync();
-        swDb.Start();
+        var swDb = Stopwatch.StartNew();
         _ = await _dbContext.Guilds.FirstOrDefaultAsync();
         swDb.Stop();
 
-        using Process process = Process.GetCurrentProcess();
+        using var process = Process.GetCurrentProcess();
 
         int members = await _dbContext.Users.CountAsync();
         int guilds = await _dbContext.Guilds.CountAsync();
@@ -37,20 +35,18 @@ public class BotStats
         GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
         string heapMemory = $"{process.PrivateMemorySize64 / 1024 / 1024} MB";
 
-        DiscordEmbedBuilder embed = new();
-        embed
+        var embed = new DiscordEmbedBuilder()
             .WithTitle("Statistics")
             .WithColor(Shared.DefaultEmbedColor)
             .AddField("Membercount:", $"{members:n0}", true)
             .AddField("Guildcount:", $"{guilds:n0}", true)
             .AddField("Threads:", $"{ThreadPool.ThreadCount}", true)
             .AddField("Websocket Latency:", $"{ping:n0} ms", true)
-            .AddField("DB Latency:", swDb.ElapsedMilliseconds.ToString("N0") + " ms", true)
+            .AddField("DB Latency:", $"{swDb.ElapsedMilliseconds:n0} ms", true)
             .AddField("Memory:", heapMemory, true)
-            .AddField("Uptime:", $"{DateTimeOffset.UtcNow.Subtract(process.StartTime)
-                .Humanize(3, minUnit: TimeUnit.Millisecond, maxUnit: TimeUnit.Day)}", true);
+            .AddField("Uptime:", $"{DateTimeOffset.UtcNow.Subtract(process.StartTime).TotalSeconds:n0} seconds", true);
 
-        DiscordInteractionResponseBuilder responseBuilder = new();
+        var responseBuilder = new DiscordInteractionResponseBuilder();
         responseBuilder.AddEmbed(embed).AsEphemeral();
 
         await ctx.RespondAsync(responseBuilder);

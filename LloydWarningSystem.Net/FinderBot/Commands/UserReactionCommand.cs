@@ -1,22 +1,32 @@
 ﻿using DSharpPlus.Commands;
 using DSharpPlus.Entities;
-using LloydWarningSystem.Net.Configuration;
+using LloydWarningSystem.Net.Context;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands;
 
-public static class UserReactionCommand
+public class UserReactionCommand
 {
-    [Command("reaction")]
-    public static async Task AddReactionAsync(CommandContext ctx, DiscordEmoji emoji)
+    private readonly LloydContext _dbContext;
+
+    public UserReactionCommand(LloydContext dbcontext)
     {
-        // if (config.UserReactions.TryGetValue(ctx.User.Id, out var emoji_id)
-        //     && emoji_id == emoji.GetDiscordName())
-        // {
-        //     await ctx.RespondAsync("You already have that emoji set!");
-        //     return;
-        // }
-        // 
-        // config.UserReactions.Add(ctx.User.Id, emoji.GetDiscordName());
-        // await ctx.RespondAsync($"Now reacting with {emoji.Name} (`{emoji.GetDiscordName()}`)");
+        _dbContext = dbcontext;
+    }
+
+    [Command("reaction")]
+    public async Task AddReactionAsync(CommandContext ctx, DiscordEmoji emoji)
+    {
+        var user = await _dbContext.FindOrCreateUserAsync(ctx.User);
+        var emoji_name = emoji.GetDiscordName();
+
+        //if (user.ReactionEmoji == emoji_name)
+        //{
+        //    await ctx.RespondAsync("You already have that emoji set!");
+        //    return;
+        //}
+        //
+        //user.ReactionEmoji = emoji_name;
+        // wait _dbContext.SaveChangesAsync();
+        // wait ctx.RespondAsync($"Now reacting with {emoji.Name} (`{emoji.GetDiscordName()}`)");
     }
 }
