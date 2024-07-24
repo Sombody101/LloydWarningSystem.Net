@@ -95,14 +95,28 @@ internal class DiscordCommandService : IHostedService
 
             LloydBot.startWatch.Stop();
 
-            await Client.SendMessageAsync(await Client.GetChannelAsync(BotConfigModel.DebugChannel),
-                $"Bitch finder active. [{LloydBot.startWatch.ElapsedMilliseconds:n0}ms] [{LloydBot.startWatch.ElapsedTicks:n0} ticks] (v{assembly.GetName().Version}, {Program.BuildType}, R{assembly.ImageRuntimeVersion})");
+            var init_embed = new DiscordEmbedBuilder()
+                .WithTitle("Bitch Finder Active")
+                .WithColor(DiscordColor.SpringGreen)
+                .AddField("Start time", $"{LloydBot.startWatch.ElapsedMilliseconds:n0}ms", true)
+                .AddField("Tick count", $"{LloydBot.startWatch.ElapsedTicks:n0} ticks", true)
+                .AddField("Bot version", $"v{assembly.GetName().Version}")
+                .AddField("Build type", $"***{Program.BuildType}***", true)
+                .AddField("Runtime version", $"R{assembly.ImageRuntimeVersion}", true);
+
+            await Client.SendMessageAsync(await Client.GetChannelAsync(BotConfigModel.DebugChannel), init_embed);
         }
         catch (Exception ex)
         {
             Logging.Log("Failed to send message to debug guild channel: " + BotConfigModel.DebugChannel);
             AnsiConsole.WriteException(ex);
         }
+
+#if !DEBUG
+        Logging.Log("Starting Minecraft Logging Service"); // But really isn't a service
+        var sender = new RandomMinecraftSender(Client);
+        _ = sender.StartSendingMessages();
+#endif
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -124,17 +138,7 @@ internal class DiscordCommandService : IHostedService
 
         if (e.Context.User.Id == BotConfigModel.AbsoluteAdmin)
         {
-            var ex_message = new DiscordEmbedBuilder()
-                .WithTitle("Bot Exception")
-                .WithColor(DiscordColor.Red)
-                .AddField("Exception Type", ex.GetType().Name)
-                .AddField("Exception Message", ex.Message, false)
-                .AddField("Exception Source", ex.Source ?? "$NO_EXCEPTION_SOURCE")
-                .AddField("Stack Trace", $"```\n{ex.StackTrace ?? "$NO_STACK_TRACE"}\n```", false)
-                .AddField("HResult", ex.HResult.ToString())
-                .AddField("Base", ex.TargetSite?.Name ?? "$NO_BASE_METHOD");
-
-            await Client.SendMessageAsync(await Client.GetChannelAsync(BotConfigModel.DebugChannel), embed: ex_message.Build());
+            await Client.SendMessageAsync(await Client.GetChannelAsync(BotConfigModel.DebugChannel), ex.MakeEmbedFromException());
         }
 
         switch (ex)

@@ -77,9 +77,38 @@ public static class HelpCommand
                 embed.AddField($"{parameter.Name.Titleize()} - {context.Extension.GetProcessor<TextCommandProcessor>()
                     .Converters[GetConverterFriendlyBaseType(parameter.Type)].ReadableName}", command.Description ?? "No description provided.");
 
-            if (command.Method.GetCustomAttributes(false)
-                .Any(attr => attr.GetType() == typeof(RequireApplicationOwnerAttribute)))
-                embed.AddField("Special Permissions: ", "Requires Bot Owner");
+            var method = command.Method;
+
+            if (method is not null)
+            {
+                if (method.GetCustomAttributes(false)
+                    .Any(attr => attr.GetType() == typeof(RequireApplicationOwnerAttribute)))
+                    embed.AddField("Special Permissions: ", "Requires Bot Owner");
+
+                embed.AddField("In Module", 
+                    $"```ansi\n{Formatter.Colorize(method.DeclaringType?.Name ?? "$UNKNOWN_MODULE", AnsiColor.Blue)} {(method.DeclaringType)}\n```");
+
+                var sb = new StringBuilder("\n");
+
+                // Get method parameters
+                foreach (var param in method.GetParameters())
+                    sb.Append($"\t{param.ParameterType.Name} {param.Name},\n");
+
+                embed.AddField("Method Declaration",
+                    $"```cs\npublic {(method.IsStatic ? "static " : string.Empty)}async {method.ReturnType.Name} {method.Name}({sb.ToString().TrimEnd()[0..^1]}\n)\n```");
+
+                // Get method attributes
+                sb = new("```ansi\n");
+                foreach (var attribute in method.GetCustomAttributes(false)
+                    .Select(attr => attr.GetType())
+                    .Where(attr => !attr.FullName.StartsWith("System")))
+                    sb.Append(Formatter.Colorize(attribute.Name.Replace("Attribute", string.Empty)
+                        .Humanize(LetterCasing.Title), AnsiColor.Magenta))
+                        .Append(",\n");
+
+                embed.AddField("Attributes",
+                    $"{sb.ToString().Trim()[0..^1]}\n```");
+            }
 
             embed.WithImageUrl("https://files.forsaken-borders.net/transparent.png");
             embed.WithFooter("<> = required, [] = optional");
@@ -119,6 +148,7 @@ public static class HelpCommand
                             : GetCommand(command.Subcommands, name[(spaceIndex + 1)..]);
                 }
             }
+
         } while (spaceIndex != -1);
 
         return null;

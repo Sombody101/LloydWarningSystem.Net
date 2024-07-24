@@ -1,13 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LloydWarningSystem.Net.Models;
 
@@ -29,6 +24,12 @@ public class UserDbEntity
     /// </summary>
     [DefaultValue(false)]
     public bool IsBotAdmin { get; set; }
+
+    // /// <summary>
+    // /// Used with <see cref="UserReactionCommand"/>
+    // /// </summary>
+    // [DefaultValue(null)]
+    // public string? ReactionEmoji { get; set; }
 }
 
 public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
@@ -54,5 +55,7 @@ public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(x => x.IsBotAdmin);
+
+        // builder.Property(x => x.ReactionEmoji);
     }
 }

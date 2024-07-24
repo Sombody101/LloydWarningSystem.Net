@@ -27,8 +27,7 @@
   </ItemGroup>
 
   <Target Condition="'$(Configuration)' == 'Debug'" Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec
-      Command="&quot;$(DevEnvDir)TextTransform.exe&quot; -out &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.cs&quot; &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.tt&quot;" />
+    <Exec Command="&quot;$(DevEnvDir)TextTransform.exe&quot; -out &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.cs&quot; &quot;$(ProjectDir)Properties\LloydBot.Net.AssemblyInfo.tt&quot;" />
   </Target>
 
   <ItemGroup>
@@ -42,6 +41,7 @@
     <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02329" />
     <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02329" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02329" />
+    <PackageReference Include="EasyCaching.SQLite" Version="1.9.2" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
 
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.7" />
