@@ -112,7 +112,7 @@ internal class DiscordCommandService : IHostedService
             AnsiConsole.WriteException(ex);
         }
 
-#if DEBUG
+#if !DEBUG
         Logging.Log("Starting Minecraft Logging Service"); // But really isn't a service
         var sender = new RandomMinecraftSender(Client);
         _ = sender.StartSendingMessages();
