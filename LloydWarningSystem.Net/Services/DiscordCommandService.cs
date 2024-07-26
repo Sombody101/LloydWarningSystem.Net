@@ -8,21 +8,23 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
-using Humanizer;
 using LloydWarningSystem.Net.Configuration;
 using LloydWarningSystem.Net.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console;
 using System.Diagnostics;
+using System.Text;
 
 namespace LloydWarningSystem.Net.Services;
 
 internal class DiscordCommandService : IHostedService
 {
+    public static DiscordCommandService? StaticInstance { get; private set; }
+
+    public readonly DiscordClient Client;
     public readonly IDbContextFactory<LloydContext> DbContextFactory;
     public readonly CommandsExtension Commands;
-    public readonly DiscordClient Client;
     public DateTime StartTime;
 
     public DiscordCommandService
@@ -32,6 +34,8 @@ internal class DiscordCommandService : IHostedService
         BotConfigModel config
     )
     {
+        StaticInstance = this;
+
         Client = discordClient;
         StartTime = DateTime.Now;
         DbContextFactory = dbContextFactory;
@@ -53,15 +57,14 @@ internal class DiscordCommandService : IHostedService
         Commands.AddChecks(assembly);
         Commands.CommandErrored += HandleCommandErrored;
 
-        //Interactivity
+        // Interactivity
         InteractivityConfiguration interactivityConfig = new()
         {
-            PollBehaviour = PollBehaviour.KeepEmojis,
             Timeout = TimeSpan.FromMinutes(10),
+            PollBehaviour = PollBehaviour.KeepEmojis,
             ButtonBehavior = ButtonPaginationBehavior.DeleteButtons,
             PaginationBehaviour = PaginationBehaviour.Ignore,
             ResponseBehavior = InteractionResponseBehavior.Ignore,
-            ResponseMessage = "invalid interaction",
             PaginationDeletion = PaginationDeletion.DeleteEmojis
         };
 
@@ -73,8 +76,9 @@ internal class DiscordCommandService : IHostedService
         Logging.Log("DiscordClientService started");
 
         //Update database to latest migration
-        await using LloydContext context = await DbContextFactory.CreateDbContextAsync(cancellationToken);
-        IEnumerable<string> pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
+        await using var context = await DbContextFactory.CreateDbContextAsync(cancellationToken);
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
+
         if (pendingMigrations.Any())
         {
             var sw = Stopwatch.StartNew();
@@ -82,7 +86,7 @@ internal class DiscordCommandService : IHostedService
             await context.Database.MigrateAsync(cancellationToken);
 
             sw.Stop();
-            Logging.Log($"Applied pending migrations in {sw.ElapsedMilliseconds} ms");
+            Logging.Log($"Applied pending migrations in {sw.ElapsedMilliseconds:n0} ms");
         }
 
         Logging.Log("Connecting bot");
@@ -100,9 +104,10 @@ internal class DiscordCommandService : IHostedService
                 .WithColor(DiscordColor.SpringGreen)
                 .AddField("Start time", $"{LloydBot.startWatch.ElapsedMilliseconds:n0}ms", true)
                 .AddField("Tick count", $"{LloydBot.startWatch.ElapsedTicks:n0} ticks", true)
-                .AddField("Bot version", $"v{assembly.GetName().Version}")
+                .AddField("Bot version", $"v{assembly.GetName().Version}", true)
                 .AddField("Build type", $"***{Program.BuildType}***", true)
-                .AddField("Runtime version", $"R{assembly.ImageRuntimeVersion}", true);
+                .AddField("Runtime version", $"R{assembly.ImageRuntimeVersion}", true)
+                .MakeWide();
 
             await Client.SendMessageAsync(await Client.GetChannelAsync(BotConfigModel.DebugChannel), init_embed);
         }
@@ -110,6 +115,7 @@ internal class DiscordCommandService : IHostedService
         {
             Logging.Log("Failed to send message to debug guild channel: " + BotConfigModel.DebugChannel);
             AnsiConsole.WriteException(ex);
+            await ex.LogToWebhookAsync();
         }
 
 #if !DEBUG
@@ -159,8 +165,11 @@ internal class DiscordCommandService : IHostedService
                     .WithTitle("You cannot run this command!")
                     .WithColor(DiscordColor.Red);
 
+                var sb = new StringBuilder();
                 foreach (var reason in checks.Errors)
-                    embed.AddField($"1. {reason.ContextCheckAttribute.GetType().Name.Humanize()}", reason.ErrorMessage);
+                    sb.Append(reason.ErrorMessage).Append('\n');
+
+                embed.AddField("Reason", sb.ToString().TrimEnd());
 
                 await e.Context.RespondAsync(embed);
                 break;

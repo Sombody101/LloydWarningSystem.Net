@@ -12,14 +12,14 @@ using System.Diagnostics;
 
 namespace LloydWarningSystem.Net;
 
-internal class LloydBot
+internal static class LloydBot
 {
-    public const string connectionString = "Data Source=./configs/lloyd-bot.db";
+    public const string ConnectionString = "Data Source=./configs/lloyd-bot.db";
 
     public static IServiceProvider Services;
     public static Stopwatch startWatch;
 
-    public async Task RunAsync()
+    public static async Task RunAsync()
     {
         startWatch = Stopwatch.StartNew();
 
@@ -48,26 +48,16 @@ internal class LloydBot
                         | DiscordIntents.MessageContents
                         | DiscordIntents.GuildMembers)
                     .AddSingleton<DiscordCommandService>()
+                    .AddSingleton(new AllocationRateTracker())
                     .AddHostedService(s => s.GetRequiredService<DiscordCommandService>())
                     .AddDbContextFactory<LloydContext>(
                         options =>
                         {
                             Logging.Log("Adding SQLite DB service");
-                            options.UseSqlite(connectionString);
+                            options.UseSqlite(ConnectionString);
                             options.EnableDetailedErrors();
                         }
                     )
-                    .AddEasyCaching(options =>
-                    {
-                        Logging.Log("Adding SQLite DB cache service");
-                        options.UseSQLite(config =>
-                        {
-                            config.DBConfig = new()
-                            {
-                                FilePath = "./configs/lloyd-db-cache.db",
-                            };
-                        });
-                    })
                     .ConfigureEventHandlers(builder =>
                     {
                         InitializeEvents(builder);
@@ -84,12 +74,6 @@ internal class LloydBot
     /// <param name="client"></param>
     private static void InitializeEvents(EventHandlingBuilder cfg)
     {
-        // var dbContextFactory = Services.GetRequiredService<IDbContextFactory<LloydContext>>(); // Assuming service is registered
-
-        cfg.HandleGuildMemberAdded(async (client, sender) =>
-        {
-        });
-
         cfg.HandleGuildMemberRemoved(async (client, sender) =>
         {
             await client.SendMessageAsync(sender.Guild.Channels.First().Value,
@@ -102,6 +86,8 @@ internal class LloydBot
             var channel = sender.Guild.Channels[0].Id;
             await client.SendMessageAsync(await client.GetChannelAsync(channel), "Hello!\nI'm here to look for fags joining and leaving!");
         });
+
+        return;
 
         cfg.HandleMessageCreated(async (client, sender) =>
         {

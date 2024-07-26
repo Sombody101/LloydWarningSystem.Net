@@ -1,10 +1,18 @@
 ﻿using Antlr4.Runtime;
+using DSharpPlus.Commands;
 using LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LExceptions;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
 
 internal sealed class RuntimeMemory
 {
+    public readonly CommandContext CallingCommandContext;
+
+    public RuntimeMemory(CommandContext commandContext)
+    {
+        CallingCommandContext = commandContext;
+    }
+
     public Stack<LStackContext> Scopes { get; init; } = new();
 
     public LStackContext GlobalScope => Scopes.FirstOrDefault() ?? throw new LEmptyStackException();

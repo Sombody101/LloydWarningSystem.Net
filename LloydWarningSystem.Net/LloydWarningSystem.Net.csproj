@@ -41,8 +41,10 @@
     <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02329" />
     <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02329" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02329" />
-    <PackageReference Include="EasyCaching.SQLite" Version="1.9.2" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0" />
 
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.7" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.7" />
@@ -85,6 +87,14 @@
 
   <ItemGroup>
     <Using Include="Utils.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\LloydBot.Net.AssemblyInfo.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LloydBot.Net.AssemblyInfo.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

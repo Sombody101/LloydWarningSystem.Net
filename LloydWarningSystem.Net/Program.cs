@@ -7,8 +7,6 @@ namespace LloydWarningSystem.Net;
 
 internal static class Program
 {
-    public const string WebhookUrl = "https://discord.com/api/webhooks/1265402178474872963/trfrbn5rKpkjMxyB4BzIuU60Ez_061zZIXfFx3LsGtUVxph5tfuQs2qvvLfy7Qye1MX7";
-
     public static DiscordWebhookClient WebhookClient = null!;
 
     public const bool DebugBuild =
@@ -41,7 +39,7 @@ internal static class Program
 
         // Initialize webhook
         WebhookClient = new DiscordWebhookClient();
-        var webhookUrl = new Uri(WebhookUrl);
+        var webhookUrl = new Uri(ConfigManager.BotConfig.DiscordWebhookUrl);
         await WebhookClient.AddWebhookAsync(webhookUrl);
 
         // On close, save files
@@ -56,27 +54,16 @@ internal static class Program
         try
         {
             // Start the bot
-            var lloyd = new LloydBot();
-            await lloyd.RunAsync();
+            await LloydBot.RunAsync();
         }
         catch (Exception e)
         {
-
             if (e is TaskCanceledException)
                 return;
 
             AnsiConsole.WriteException(e);
-            await LogToWebhookAsync(e);
+            await e.LogToWebhookAsync();
             Environment.Exit(69);
         }
-    }
-
-    public static async Task LogToWebhookAsync(Exception e)
-    {
-        var webhookBuilder = new DiscordWebhookBuilder()
-            .WithUsername($"Lloyd-{BuildType}")
-            .AddEmbed(e.MakeEmbedFromException());
-
-        await WebhookClient.BroadcastMessageAsync(webhookBuilder);
     }
 }

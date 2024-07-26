@@ -1,14 +1,7 @@
-﻿using CommunityToolkit.HighPerformance;
-using DSharpPlus.Commands;
+﻿using DSharpPlus.Commands;
 using DSharpPlus.Entities;
 using LloydWarningSystem.Net.Configuration;
-using LloydWarningSystem.Net.FinderBot.Commands.Admin;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LloydWarningSystem.Net.FinderBot;
 
@@ -26,7 +19,7 @@ public static class RandomNsfwCommands
         await ctx.RespondAsync($"You have just killed {user.Mention} in cold blood.\nThey were a fag anyway, so it doesn't really matter.");
     }
 
-    [Command("fuck")]
+    [Command("fuck"), Description("Does this even need a description?")]
     public static async ValueTask FuckUserAsync(CommandContext ctx, DiscordUser user)
     {
         if (user.Id == ctx.User.Id)
@@ -106,5 +99,5 @@ public static class RandomNsfwCommands
 
             await ctx.RespondAsync($"You jerked {user.Mention} real good.\nThey're a little sore, and you are now a whore.");
         }
-    } 
+    }
 }

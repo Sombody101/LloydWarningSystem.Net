@@ -6,6 +6,7 @@ using LloydWarningSystem.Net.Configuration;
 using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.Models;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands.Admin;
 
@@ -139,9 +140,11 @@ public class BotManager
             .WithFooter("Restart will take ~1000ms to account for file stream exits and bot initialization.")
         );
 
+#if DEBUG
         // Docker should restart Lloyd automatically
-        // System.Diagnostics.Process.Start(open_path, Shared.PreviousInstance);
-        
+        Process.Start(open_path, Shared.PreviousInstance);
+#endif
+
         Environment.Exit(exit_code);
     }
 }

@@ -37,7 +37,7 @@ public static class PingCommand
             await ctx.RespondAsync(message);
     }
 
-    private static string FormatTickCount()
+    public static string FormatTickCount()
     {
         TimeSpan uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
 

@@ -29,19 +29,24 @@ public static class HelpCommand
 
     private static DiscordMessageBuilder GetHelpMessage(CommandContext context)
     {
-        StringBuilder stringBuilder = new();
+        var stringBuilder = new StringBuilder();
         foreach (Command command in context.Extension.Commands.Values.OrderBy(x => x.Name))
             stringBuilder.AppendLine($"`{command.Name.Titleize()}`: {command.Description ?? "No description provided"}");
 
-        return new DiscordMessageBuilder().WithContent($"A total of {context.Extension.Commands.Values.Select(CountCommands).Sum():N0} commands were found. Use `help <command>` for more information on any of them.").AddEmbed(new DiscordEmbedBuilder().WithTitle("Commands").WithDescription(stringBuilder.ToString()));
+        return new DiscordMessageBuilder()
+            .WithContent($"A total of {context.Extension.Commands.Values.Select(CountCommands).Sum():N0} commands were found. Use `help <command>` for more information on any of them.")
+            .AddEmbed(new DiscordEmbedBuilder()
+            .WithTitle("Commands")
+            .WithDescription(stringBuilder.ToString()));
     }
 
     private static DiscordMessageBuilder GetHelpMessage(CommandContext context, Command command)
     {
-        DiscordEmbedBuilder embed = new();
+        var embed = new DiscordEmbedBuilder();
 
         embed.WithTitle($"Help Command: `{command.FullName.Titleize()}`");
         embed.WithDescription(command.Description ?? "No description provided.");
+
         if (command.Subcommands.Count > 0)
             foreach (Command subcommand in command.Subcommands.OrderBy(x => x.Name))
                 embed.AddField(subcommand.Name.Titleize(), command.Description ?? "No description provided.");
@@ -49,9 +54,9 @@ public static class HelpCommand
         {
             if (command.Attributes.FirstOrDefault(x => x is RequirePermissionsAttribute) is RequirePermissionsAttribute permissions)
             {
-                DiscordPermissions commonPermissions = permissions.BotPermissions & permissions.UserPermissions;
-                DiscordPermissions botUniquePermissions = permissions.BotPermissions ^ commonPermissions;
-                DiscordPermissions userUniquePermissions = permissions.UserPermissions ^ commonPermissions;
+                var commonPermissions = permissions.BotPermissions & permissions.UserPermissions;
+                var botUniquePermissions = permissions.BotPermissions ^ commonPermissions;
+                var userUniquePermissions = permissions.UserPermissions ^ commonPermissions;
                 var builder = new StringBuilder();
 
                 if (commonPermissions != default)
@@ -81,36 +86,47 @@ public static class HelpCommand
 
             if (method is not null)
             {
-                if (method.GetCustomAttributes(false)
-                    .Any(attr => attr.GetType() == typeof(RequireApplicationOwnerAttribute)))
-                    embed.AddField("Special Permissions: ", "Requires Bot Owner");
-
-                embed.AddField("In Module", 
-                    $"```ansi\n{Formatter.Colorize(method.DeclaringType?.Name ?? "$UNKNOWN_MODULE", AnsiColor.Blue)} {(method.DeclaringType)}\n```");
+                embed.AddField("In Module",
+                    $"```ansi\n{Formatter.Colorize(method.DeclaringType?.Name ?? "$UNKNOWN_MODULE", AnsiColor.Blue)}\n```");
 
                 var sb = new StringBuilder("\n");
 
                 // Get method parameters
                 foreach (var param in method.GetParameters())
-                    sb.Append($"\t{param.ParameterType.Name} {param.Name},\n");
+                {
+                    // Get attributes for parameters (if any)
+                    var attributes = param.CustomAttributes;
+                    if (attributes.Count() is not 0)
+                    {
+                        foreach (var attr in attributes.Select(attr => attr.AttributeType))
+                            sb.Append("\n\t[").Append(attr.Name.Replace("Attribute", string.Empty))
+                                .Append("]\n");
+                    }
+
+                    sb.Append('\t').Append(param.ParameterType.Name)
+                        .Append(' ').Append(param.Name).Append(",\n");
+                }
 
                 embed.AddField("Method Declaration",
-                    $"```cs\npublic {(method.IsStatic ? "static " : string.Empty)}async {method.ReturnType.Name} {method.Name}({sb.ToString().TrimEnd()[0..^1]}\n)\n```");
+                    $"```cs\npublic {(method.IsStatic
+                        ? "static "
+                        : string.Empty)}async {method.ReturnType.Name} {method.Name}({sb.ToString().TrimEnd()[0..^1]}\n)\n```");
 
                 // Get method attributes
                 sb = new("```ansi\n");
-                foreach (var attribute in method.GetCustomAttributes(false)
-                    .Select(attr => attr.GetType())
-                    .Where(attr => !attr.FullName.StartsWith("System")))
+                foreach (var attribute in method.CustomAttributes
+                    .Select(attr => attr.AttributeType)
+                    .Where(attr => !(attr.FullName?.StartsWith("System") ?? false)))
                     sb.Append(Formatter.Colorize(attribute.Name.Replace("Attribute", string.Empty)
-                        .Humanize(LetterCasing.Title), AnsiColor.Magenta))
+                            .Humanize(LetterCasing.Title), AnsiColor.Magenta))
                         .Append(",\n");
 
-                embed.AddField("Attributes",
-                    $"{sb.ToString().Trim()[0..^1]}\n```");
+                // In order for a method to show up here, there has to be at least one attribute (CommandAttribute), so no
+                // need to check for the length of the string builder before taking a slice
+                embed.AddField("Attributes", $"{sb.ToString().Trim()[0..^1]}\n```");
             }
 
-            embed.WithImageUrl("https://files.forsaken-borders.net/transparent.png");
+            embed.MakeWide();
             embed.WithFooter("<> = required, [] = optional");
         }
 
@@ -130,9 +146,9 @@ public static class HelpCommand
 
             commandName = commandName.Underscore();
             foreach (Command command in commands.Where(cmd => cmd.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)))
-                    return spaceIndex == -1
-                        ? command
-                        : GetCommand(command.Subcommands, name[(spaceIndex + 1)..]);
+                return spaceIndex == -1
+                    ? command
+                    : GetCommand(command.Subcommands, name[(spaceIndex + 1)..]);
 
             // Search aliases
             foreach (Command command in commands)

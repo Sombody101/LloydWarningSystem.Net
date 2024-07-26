@@ -1,7 +1,6 @@
-﻿using DSharpPlus.Entities;
-using LloydWarningSystem.Net.FinderBot;
-using LloydWarningSystem.Net.Models;
+﻿using LloydWarningSystem.Net.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace LloydWarningSystem.Net.Context;
 
@@ -19,13 +18,19 @@ public class LloydContext : DbContext
     public DbSet<QuoteDbEntity> Quotes { get; set; }
     public DbSet<ReminderDbEntity> Reminders { get; set; }
     public DbSet<VoiceAlert> VoiceAlerts { get; set; }
-        
-    protected override void OnModelCreating(ModelBuilder builder)
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        builder.ApplyConfigurationsFromAssembly(typeof(LloydContext).Assembly);
-        base.OnModelCreating(builder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(LloydContext).Assembly);
+
+        // modelBuilder.Entity<MessageAlias>()
+        //     .Property(e => e.MessageAliasesJson)
+        //     .HasConversion(v => JsonConvert.SerializeObject(v),
+        //                    v => JsonConvert.DeserializeObject<Dictionary<string, string>>(v));
+
+        base.OnModelCreating(modelBuilder);
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite(LloydBot.connectionString);
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseSqlite(LloydBot.ConnectionString);
 }
