@@ -24,25 +24,12 @@ internal class BotConfigModel : IBotConfigModel
     [JsonRequired]
     [JsonProperty("command_prefixes")]
     public List<string> CommandPrefixes { get; init; } = [];
-}
 
-[Serializable]
-internal class UserStorageModel : IConfigModel
-{
-    [JsonProperty("attention_users")]
-    public Dictionary<ulong, string> AttentionUsers { get; init; } = [];
+    [JsonProperty("webhook_url")]
+    public string DiscordWebhookUrl { get; init; } = string.Empty;
 
-    [JsonProperty("user_reactions")]
-    public Dictionary<ulong, string> UserReactions { get; init; } = [];
-
-    [JsonProperty("bot_admins")]
-    public Dictionary<ulong, string> BotAdmins { get; init; } = new() {
-        { BotConfigModel.AbsoluteAdmin, "oke" }
-    };
-
-    [JsonProperty("warning_messages")]
-    public List<string> WarningMessages { get; init; } = [];
-
-    [JsonProperty("user_seeking_enabled")]
-    public bool LookForJoiningUsers { get; set; } = true;
+    [JsonProperty("repl_url")]
+    public string ReplUrl { get; init; } = Program.DebugBuild
+        ? "http://server.lan:31337/eval" // Connect to server from dev machine
+        : "http://localhost:31337/eval"; // Running from server
 }
