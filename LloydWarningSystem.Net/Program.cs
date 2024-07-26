@@ -25,6 +25,7 @@ internal static class Program
         Logging.OverrideConsoleLogging();
         Logging.Log($"Bot start @ {DateTime.Now} ({BuildType} build)");
 
+#if DEBUG
         // The bot has restarted itself, so wait for the previous instance
         // to finish saving data
         if (args.Length > 0 && args[0] == Shared.PreviousInstance)
@@ -33,6 +34,7 @@ internal static class Program
             Task.Delay(1000).Wait();
             Logging.Log("Starting bot.");
         }
+#endif
 
         // Load configs and initialize the serializer
         ConfigManager.InitializeConfigs();
