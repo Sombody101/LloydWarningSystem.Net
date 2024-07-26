@@ -1,9 +1,7 @@
 ﻿using DSharpPlus.Commands;
 using DSharpPlus.Entities;
-using DSharpPlus.Entities.AuditLogs;
 using System.Diagnostics;
 using System.Globalization;
-using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -18,17 +16,16 @@ public static class ShipCommand
 
         var sw = Stopwatch.StartNew();
 
-        var user1_hash = await user1.Username.GetHashString();
-        var user2_hash = await user2.Username.GetHashString();
+        var asparagus1_hash = user1.Username.GetHashString();
+        var asparagus2_hash = user2.Username.GetHashString();
 
-        var avatar_hash = await (await XorHashes(user1.AvatarHash, user2.AvatarHash)).GetHashString();
-        var banner_hash = await (await XorHashes(user1.BannerHash ?? "$NULL",
-            user2.BannerHash ?? "$NULL")).GetHashString();
+        var avatar_hash = XorHashes(user1.AvatarHash, user2.AvatarHash).GetHashString();
+        var banner_hash = XorHashes(user1.BannerHash ?? "$NULL", user2.BannerHash ?? "$NULL").GetHashString();
 
-        var combined_hash = await (await XorHashes(avatar_hash, banner_hash)).GetHashString();
-        var name_hash = await (await XorHashes(user1_hash, user2_hash)).GetHashString();
+        var combined_hash = XorHashes(avatar_hash, banner_hash).GetHashString();
+        var name_hash = XorHashes(asparagus1_hash, asparagus2_hash).GetHashString();
 
-        var final_hash = await (await XorHashes(combined_hash, name_hash)).GetHashString();
+        var final_hash = XorHashes(combined_hash, name_hash).GetHashString();
         var percent = HashToRange(final_hash);
 
         string message = percent switch
@@ -50,16 +47,16 @@ public static class ShipCommand
             .WithTitle($"Compatibility between {user1.Username} and {user2.Username}")
             .WithColor(Shared.DefaultEmbedColor)
             .AddField($"{percent:n0}% compatibility!", message)
-            .WithFooter($"Calculation Took {sw.ElapsedMilliseconds}ms\n\nFinal comparison hash: {final_hash}");
+            .WithFooter($"Calculation Took {sw.ElapsedMilliseconds}ms\nFinal comparison hash: {final_hash}");
 
         if (show_hashes)
-            embed.AddField(nameof(user1_hash),      $"{user1_hash} ({user1_hash.HashToRange()}%)")
-                .AddField(nameof(user2_hash),       $"{user2_hash} ({user2_hash.HashToRange()}%)")
-                .AddField(nameof(avatar_hash),      $"{avatar_hash} ({avatar_hash.HashToRange()}%)")
-                .AddField(nameof(banner_hash),      $"{banner_hash} ({banner_hash.HashToRange()}%)")
-                .AddField(nameof(combined_hash),    $"{combined_hash} ({combined_hash.HashToRange()}%)")
-                .AddField(nameof(name_hash),        $"{name_hash} ({name_hash.HashToRange()}%)")
-                .AddField(nameof(final_hash),       $"{final_hash} ({final_hash.HashToRange()}%)");
+            embed.AddField(nameof(asparagus1_hash), $"{asparagus1_hash} ({asparagus1_hash.HashToRange()}%)")
+                .AddField(nameof(asparagus2_hash), $"{asparagus2_hash} ({asparagus2_hash.HashToRange()}%)")
+                .AddField(nameof(avatar_hash), $"{avatar_hash} ({avatar_hash.HashToRange()}%)")
+                .AddField(nameof(banner_hash), $"{banner_hash} ({banner_hash.HashToRange()}%)")
+                .AddField(nameof(combined_hash), $"{combined_hash} ({combined_hash.HashToRange()}%)")
+                .AddField(nameof(name_hash), $"{name_hash} ({name_hash.HashToRange()}%)")
+                .AddField(nameof(final_hash), $"{final_hash} ({final_hash.HashToRange()}%)");
 
         await ctx.RespondAsync(embed: embed);
     }
@@ -72,19 +69,19 @@ public static class ShipCommand
         return +(Math.Sqrt((double)l) * scalingFactor % 101);
     }
 
-    private static async ValueTask<byte[]> GetHash(string inputString)
+    private static byte[] GetHash(string inputString)
         => SHA256.HashData(Encoding.UTF8.GetBytes(inputString)).Skip(16).ToArray();
 
-    private static async ValueTask<string> GetHashString(this string inputString)
+    private static string GetHashString(this string inputString)
     {
         var sb = new StringBuilder();
-        foreach (byte b in await GetHash(inputString))
+        foreach (byte b in GetHash(inputString))
             sb.Append(b.ToString("X2"));
 
         return sb.ToString();
     }
 
-    private static async ValueTask<string> XorHashes(string hash1, string hash2)
+    private static string XorHashes(string hash1, string hash2)
     {
         int length = hash1.Length;
         var result = new StringBuilder(length);
