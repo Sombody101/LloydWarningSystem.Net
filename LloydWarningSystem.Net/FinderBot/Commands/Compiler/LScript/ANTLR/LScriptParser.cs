@@ -120,7 +120,7 @@ public partial class LScriptParser : Parser {
 			State = 25;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 34024L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 33992L) != 0)) {
 				{
 				{
 				State = 22;
@@ -239,10 +239,9 @@ public partial class LScriptParser : Parser {
 
 	public partial class VariableAssignmentContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Identifier() { return GetToken(LScriptParser.Identifier, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public VariableDeclarationContext variableDeclaration() {
-			return GetRuleContext<VariableDeclarationContext>(0);
+		[System.Diagnostics.DebuggerNonUserCode] public VariableDefinitionContext variableDefinition() {
+			return GetRuleContext<VariableDefinitionContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Const() { return GetToken(LScriptParser.Const, 0); }
 		public VariableAssignmentContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -260,24 +259,13 @@ public partial class LScriptParser : Parser {
 	public VariableAssignmentContext variableAssignment() {
 		VariableAssignmentContext _localctx = new VariableAssignmentContext(Context, State);
 		EnterRule(_localctx, 4, RULE_variableAssignment);
-		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 42;
-			ErrorHandler.Sync(this);
-			_la = TokenStream.LA(1);
-			if (_la==Const) {
-				{
-				State = 41;
-				Match(Const);
-				}
-			}
-
-			State = 44;
+			State = 41;
 			Match(Identifier);
-			State = 45;
-			variableDeclaration();
+			State = 42;
+			variableDefinition();
 			}
 		}
 		catch (RecognitionException re) {
@@ -292,9 +280,9 @@ public partial class LScriptParser : Parser {
 	}
 
 	public partial class VariableDeclarationContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Local() { return GetToken(LScriptParser.Local, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Identifier() { return GetToken(LScriptParser.Identifier, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Const() { return GetToken(LScriptParser.Const, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Local() { return GetToken(LScriptParser.Local, 0); }
 		public VariableDeclarationContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -316,19 +304,27 @@ public partial class LScriptParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 48;
+			State = 45;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==Const) {
 				{
-				State = 47;
+				State = 44;
 				Match(Const);
 				}
 			}
 
+			State = 48;
+			ErrorHandler.Sync(this);
+			_la = TokenStream.LA(1);
+			if (_la==Local) {
+				{
+				State = 47;
+				Match(Local);
+				}
+			}
+
 			State = 50;
-			Match(Local);
-			State = 51;
 			Match(Identifier);
 			}
 		}
@@ -368,9 +364,9 @@ public partial class LScriptParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 53;
+			State = 52;
 			Match(Equals);
-			State = 54;
+			State = 53;
 			expression();
 			}
 		}
@@ -417,25 +413,25 @@ public partial class LScriptParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 56;
+			State = 55;
 			Match(Sub);
-			State = 57;
+			State = 56;
 			Match(Identifier);
-			State = 58;
+			State = 57;
 			Match(OpenParen);
-			State = 60;
+			State = 59;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==Identifier) {
 				{
-				State = 59;
+				State = 58;
 				parameterList();
 				}
 			}
 
-			State = 62;
+			State = 61;
 			Match(CloseParen);
-			State = 63;
+			State = 62;
 			block();
 			}
 		}
@@ -485,37 +481,37 @@ public partial class LScriptParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 65;
+			State = 64;
 			Match(Identifier);
-			State = 66;
+			State = 65;
 			Match(OpenParen);
-			State = 75;
+			State = 74;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 34024L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 33992L) != 0)) {
 				{
-				State = 67;
+				State = 66;
 				expression();
-				State = 72;
+				State = 71;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				while (_la==Comma) {
 					{
 					{
-					State = 68;
+					State = 67;
 					Match(Comma);
-					State = 69;
+					State = 68;
 					expression();
 					}
 					}
-					State = 74;
+					State = 73;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 				}
 				}
 			}
 
-			State = 77;
+			State = 76;
 			Match(CloseParen);
 			}
 		}
@@ -559,38 +555,38 @@ public partial class LScriptParser : Parser {
 		EnterRule(_localctx, 14, RULE_block);
 		int _la;
 		try {
-			State = 89;
+			State = 88;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case OpenBrace:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 79;
+				State = 78;
 				Match(OpenBrace);
-				State = 83;
+				State = 82;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 34024L) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 33992L) != 0)) {
 					{
 					{
-					State = 80;
+					State = 79;
 					line();
 					}
 					}
-					State = 85;
+					State = 84;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 				}
-				State = 86;
+				State = 85;
 				Match(CloseBrace);
 				}
 				break;
 			case Arrow:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 87;
+				State = 86;
 				Match(Arrow);
-				State = 88;
+				State = 87;
 				line();
 				}
 				break;
@@ -695,14 +691,14 @@ public partial class LScriptParser : Parser {
 		ExpressionContext _localctx = new ExpressionContext(Context, State);
 		EnterRule(_localctx, 16, RULE_expression);
 		try {
-			State = 97;
+			State = 96;
 			ErrorHandler.Sync(this);
 			switch ( Interpreter.AdaptivePredict(TokenStream,11,Context) ) {
 			case 1:
 				_localctx = new IdentifierExpressionContext(_localctx);
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 91;
+				State = 90;
 				Match(Identifier);
 				}
 				break;
@@ -710,7 +706,7 @@ public partial class LScriptParser : Parser {
 				_localctx = new StringLiteralExpressionContext(_localctx);
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 92;
+				State = 91;
 				Match(StringLiteral);
 				}
 				break;
@@ -718,7 +714,7 @@ public partial class LScriptParser : Parser {
 				_localctx = new VariableAssignmentExpressionContext(_localctx);
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 93;
+				State = 92;
 				variableAssignment();
 				}
 				break;
@@ -726,7 +722,7 @@ public partial class LScriptParser : Parser {
 				_localctx = new RoutineDefinitionExpressionContext(_localctx);
 				EnterOuterAlt(_localctx, 4);
 				{
-				State = 94;
+				State = 93;
 				routineDefinition();
 				}
 				break;
@@ -734,7 +730,7 @@ public partial class LScriptParser : Parser {
 				_localctx = new RoutineCallExpressionContext(_localctx);
 				EnterOuterAlt(_localctx, 5);
 				{
-				State = 95;
+				State = 94;
 				routineCall();
 				}
 				break;
@@ -742,7 +738,7 @@ public partial class LScriptParser : Parser {
 				_localctx = new BlockExpressionContext(_localctx);
 				EnterOuterAlt(_localctx, 6);
 				{
-				State = 96;
+				State = 95;
 				block();
 				}
 				break;
@@ -788,21 +784,21 @@ public partial class LScriptParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 99;
+			State = 98;
 			expression();
-			State = 103;
+			State = 102;
 			ErrorHandler.Sync(this);
 			_alt = Interpreter.AdaptivePredict(TokenStream,12,Context);
 			while ( _alt!=1 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1+1 ) {
 					{
 					{
-					State = 100;
+					State = 99;
 					Match(Semi);
 					}
 					} 
 				}
-				State = 105;
+				State = 104;
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,12,Context);
 			}
@@ -849,21 +845,21 @@ public partial class LScriptParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 106;
+			State = 105;
 			Match(Identifier);
-			State = 111;
+			State = 110;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			while (_la==Comma) {
 				{
 				{
-				State = 107;
+				State = 106;
 				Match(Comma);
-				State = 108;
+				State = 107;
 				Match(Identifier);
 				}
 				}
-				State = 113;
+				State = 112;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
@@ -881,40 +877,40 @@ public partial class LScriptParser : Parser {
 	}
 
 	private static int[] _serializedATN = {
-		4,1,15,115,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+		4,1,15,114,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
 		7,7,2,8,7,8,2,9,7,9,2,10,7,10,1,0,5,0,24,8,0,10,0,12,0,27,9,0,1,1,1,1,
-		1,1,3,1,32,8,1,1,1,5,1,35,8,1,10,1,12,1,38,9,1,3,1,40,8,1,1,2,3,2,43,8,
-		2,1,2,1,2,1,2,1,3,3,3,49,8,3,1,3,1,3,1,3,1,4,1,4,1,4,1,5,1,5,1,5,1,5,3,
-		5,61,8,5,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,5,6,71,8,6,10,6,12,6,74,9,6,3,
-		6,76,8,6,1,6,1,6,1,7,1,7,5,7,82,8,7,10,7,12,7,85,9,7,1,7,1,7,1,7,3,7,90,
-		8,7,1,8,1,8,1,8,1,8,1,8,1,8,3,8,98,8,8,1,9,1,9,5,9,102,8,9,10,9,12,9,105,
-		9,9,1,10,1,10,1,10,5,10,110,8,10,10,10,12,10,113,9,10,1,10,1,103,0,11,
-		0,2,4,6,8,10,12,14,16,18,20,0,0,121,0,25,1,0,0,0,2,39,1,0,0,0,4,42,1,0,
-		0,0,6,48,1,0,0,0,8,53,1,0,0,0,10,56,1,0,0,0,12,65,1,0,0,0,14,89,1,0,0,
-		0,16,97,1,0,0,0,18,99,1,0,0,0,20,106,1,0,0,0,22,24,3,2,1,0,23,22,1,0,0,
+		1,1,3,1,32,8,1,1,1,5,1,35,8,1,10,1,12,1,38,9,1,3,1,40,8,1,1,2,1,2,1,2,
+		1,3,3,3,46,8,3,1,3,3,3,49,8,3,1,3,1,3,1,4,1,4,1,4,1,5,1,5,1,5,1,5,3,5,
+		60,8,5,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,5,6,70,8,6,10,6,12,6,73,9,6,3,6,
+		75,8,6,1,6,1,6,1,7,1,7,5,7,81,8,7,10,7,12,7,84,9,7,1,7,1,7,1,7,3,7,89,
+		8,7,1,8,1,8,1,8,1,8,1,8,1,8,3,8,97,8,8,1,9,1,9,5,9,101,8,9,10,9,12,9,104,
+		9,9,1,10,1,10,1,10,5,10,109,8,10,10,10,12,10,112,9,10,1,10,1,102,0,11,
+		0,2,4,6,8,10,12,14,16,18,20,0,0,120,0,25,1,0,0,0,2,39,1,0,0,0,4,41,1,0,
+		0,0,6,45,1,0,0,0,8,52,1,0,0,0,10,55,1,0,0,0,12,64,1,0,0,0,14,88,1,0,0,
+		0,16,96,1,0,0,0,18,98,1,0,0,0,20,105,1,0,0,0,22,24,3,2,1,0,23,22,1,0,0,
 		0,24,27,1,0,0,0,25,23,1,0,0,0,25,26,1,0,0,0,26,1,1,0,0,0,27,25,1,0,0,0,
 		28,40,3,18,9,0,29,32,3,10,5,0,30,32,3,12,6,0,31,29,1,0,0,0,31,30,1,0,0,
 		0,32,36,1,0,0,0,33,35,5,13,0,0,34,33,1,0,0,0,35,38,1,0,0,0,36,34,1,0,0,
 		0,36,37,1,0,0,0,37,40,1,0,0,0,38,36,1,0,0,0,39,28,1,0,0,0,39,31,1,0,0,
-		0,40,3,1,0,0,0,41,43,5,5,0,0,42,41,1,0,0,0,42,43,1,0,0,0,43,44,1,0,0,0,
-		44,45,5,15,0,0,45,46,3,6,3,0,46,5,1,0,0,0,47,49,5,5,0,0,48,47,1,0,0,0,
-		48,49,1,0,0,0,49,50,1,0,0,0,50,51,5,4,0,0,51,52,5,15,0,0,52,7,1,0,0,0,
-		53,54,5,14,0,0,54,55,3,16,8,0,55,9,1,0,0,0,56,57,5,3,0,0,57,58,5,15,0,
-		0,58,60,5,8,0,0,59,61,3,20,10,0,60,59,1,0,0,0,60,61,1,0,0,0,61,62,1,0,
-		0,0,62,63,5,9,0,0,63,64,3,14,7,0,64,11,1,0,0,0,65,66,5,15,0,0,66,75,5,
-		8,0,0,67,72,3,16,8,0,68,69,5,12,0,0,69,71,3,16,8,0,70,68,1,0,0,0,71,74,
-		1,0,0,0,72,70,1,0,0,0,72,73,1,0,0,0,73,76,1,0,0,0,74,72,1,0,0,0,75,67,
-		1,0,0,0,75,76,1,0,0,0,76,77,1,0,0,0,77,78,5,9,0,0,78,13,1,0,0,0,79,83,
-		5,10,0,0,80,82,3,18,9,0,81,80,1,0,0,0,82,85,1,0,0,0,83,81,1,0,0,0,83,84,
-		1,0,0,0,84,86,1,0,0,0,85,83,1,0,0,0,86,90,5,11,0,0,87,88,5,6,0,0,88,90,
-		3,18,9,0,89,79,1,0,0,0,89,87,1,0,0,0,90,15,1,0,0,0,91,98,5,15,0,0,92,98,
-		5,7,0,0,93,98,3,4,2,0,94,98,3,10,5,0,95,98,3,12,6,0,96,98,3,14,7,0,97,
-		91,1,0,0,0,97,92,1,0,0,0,97,93,1,0,0,0,97,94,1,0,0,0,97,95,1,0,0,0,97,
-		96,1,0,0,0,98,17,1,0,0,0,99,103,3,16,8,0,100,102,5,13,0,0,101,100,1,0,
-		0,0,102,105,1,0,0,0,103,104,1,0,0,0,103,101,1,0,0,0,104,19,1,0,0,0,105,
-		103,1,0,0,0,106,111,5,15,0,0,107,108,5,12,0,0,108,110,5,15,0,0,109,107,
-		1,0,0,0,110,113,1,0,0,0,111,109,1,0,0,0,111,112,1,0,0,0,112,21,1,0,0,0,
-		113,111,1,0,0,0,14,25,31,36,39,42,48,60,72,75,83,89,97,103,111
+		0,40,3,1,0,0,0,41,42,5,15,0,0,42,43,3,8,4,0,43,5,1,0,0,0,44,46,5,5,0,0,
+		45,44,1,0,0,0,45,46,1,0,0,0,46,48,1,0,0,0,47,49,5,4,0,0,48,47,1,0,0,0,
+		48,49,1,0,0,0,49,50,1,0,0,0,50,51,5,15,0,0,51,7,1,0,0,0,52,53,5,14,0,0,
+		53,54,3,16,8,0,54,9,1,0,0,0,55,56,5,3,0,0,56,57,5,15,0,0,57,59,5,8,0,0,
+		58,60,3,20,10,0,59,58,1,0,0,0,59,60,1,0,0,0,60,61,1,0,0,0,61,62,5,9,0,
+		0,62,63,3,14,7,0,63,11,1,0,0,0,64,65,5,15,0,0,65,74,5,8,0,0,66,71,3,16,
+		8,0,67,68,5,12,0,0,68,70,3,16,8,0,69,67,1,0,0,0,70,73,1,0,0,0,71,69,1,
+		0,0,0,71,72,1,0,0,0,72,75,1,0,0,0,73,71,1,0,0,0,74,66,1,0,0,0,74,75,1,
+		0,0,0,75,76,1,0,0,0,76,77,5,9,0,0,77,13,1,0,0,0,78,82,5,10,0,0,79,81,3,
+		18,9,0,80,79,1,0,0,0,81,84,1,0,0,0,82,80,1,0,0,0,82,83,1,0,0,0,83,85,1,
+		0,0,0,84,82,1,0,0,0,85,89,5,11,0,0,86,87,5,6,0,0,87,89,3,18,9,0,88,78,
+		1,0,0,0,88,86,1,0,0,0,89,15,1,0,0,0,90,97,5,15,0,0,91,97,5,7,0,0,92,97,
+		3,4,2,0,93,97,3,10,5,0,94,97,3,12,6,0,95,97,3,14,7,0,96,90,1,0,0,0,96,
+		91,1,0,0,0,96,92,1,0,0,0,96,93,1,0,0,0,96,94,1,0,0,0,96,95,1,0,0,0,97,
+		17,1,0,0,0,98,102,3,16,8,0,99,101,5,13,0,0,100,99,1,0,0,0,101,104,1,0,
+		0,0,102,103,1,0,0,0,102,100,1,0,0,0,103,19,1,0,0,0,104,102,1,0,0,0,105,
+		110,5,15,0,0,106,107,5,12,0,0,107,109,5,15,0,0,108,106,1,0,0,0,109,112,
+		1,0,0,0,110,108,1,0,0,0,110,111,1,0,0,0,111,21,1,0,0,0,112,110,1,0,0,0,
+		14,25,31,36,39,45,48,59,71,74,82,88,96,102,110
 	};
 
 	public static readonly ATN _ATN =

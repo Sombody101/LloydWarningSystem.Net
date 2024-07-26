@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
@@ -8,7 +9,8 @@ internal sealed class LStackContext
     private readonly LStackContext? parentStackContext;
 
     public readonly string Name;
-    public Dictionary<string, object?> Symbols { get; private set; } = [];
+    public Dictionary<string, object?> Symbols { get; init; } = [];
+    public Dictionary<string, string?> ConstantSymbols { get; init; } = [];
 
     public LFunction? FunctionBeingCalled { get; init; }
     public ParserRuleContext? ScriptContext { get; init; }
@@ -80,6 +82,25 @@ internal sealed class LStackContext
         outValue = null;
         return false;
     }
+
+    public bool CreateConstant(string name)
+    {
+        if (ConstantSymbols.ContainsKey(name))
+            return false;
+
+        Symbols[name] = true;
+        return true;
+    }
+
+    // public bool GetConstant(string name, out string? outvalue)
+    // {
+    //     if (ConstantSymbols.TryGetValue(name, out string? value))
+    //     {
+    // 
+    //     }
+    // 
+    //     
+    // }
 
     public readonly struct ArgumentInfo
     {

@@ -19,11 +19,11 @@ statement
     ;
 
 variableAssignment
-    : Const? Identifier variableDeclaration
+    : Identifier variableDefinition
     ;
 
 variableDeclaration
-    : Const? Local Identifier
+    : Const? Local? Identifier
     ;
 
 variableDefinition

@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime.Misc;
+using DSharpPlus.Commands;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
 
@@ -6,17 +7,20 @@ internal class LScriptRuntime : LScriptParserBaseVisitor<string>
 {
     private readonly RuntimeMemory _memory;
 
-    public LScriptRuntime()
+    public LScriptRuntime(CommandContext commandContext)
     {
-        _memory = new();
+        _memory = new(commandContext);
 
         _memory.Scopes.Push(new("<global>", null));
     }
 
-    public override string VisitVariableDeclaration([NotNull] LScriptParser.VariableDeclarationContext context)
+    public override string VisitVariableAssignment([NotNull] LScriptParser.VariableAssignmentContext context)
     {
-        var varName = context.Identifier().GetText();
-        _memory.DeclareVariable(varName, string.Empty, context);
+        // var varName = context.Identifier().GetText();
+        // var value = Visit(context.variableDefinition().expression());
+        // _memory.SetVariable(varName, value, context);
+        // 
+        // return value;
 
         return string.Empty;
     }
