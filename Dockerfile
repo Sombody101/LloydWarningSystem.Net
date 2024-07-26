@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
 COPY ./LloydWarningSystem.Net .
 RUN dotnet restore
-RUN dotnet publish -c Release -o lloyd-bot
+RUN dotnet publish -c Release -o lloyd-bot --property WarningLevel=0
 
 # Image
 FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine
