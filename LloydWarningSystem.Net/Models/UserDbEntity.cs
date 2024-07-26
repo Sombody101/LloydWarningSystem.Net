@@ -19,6 +19,8 @@ public class UserDbEntity
     public List<ReminderDbEntity> Reminders { get; set; }
     public List<VoiceAlert> VoiceAlerts { get; set; }
 
+    public List<MessageAlias> MessageAliases { get; set; }
+
     /// <summary>
     /// Can use special commands
     /// </summary>
@@ -53,6 +55,8 @@ public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.MessageAliases);
 
         builder.Property(x => x.IsBotAdmin);
 
