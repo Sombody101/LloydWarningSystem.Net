@@ -2,7 +2,7 @@ services:
   # Main bot service
   lloyd:
     container_name: lloyd
-    build: .
+    image: ghcr.io/sombody101/lloydwarningsystem.net:latest  # Specify image name (for watchtower)
     volumes:
       - /mnt/AppStorage/lloyd-bot/configs:/app/configs/ # Config files
     restart: unless-stopped

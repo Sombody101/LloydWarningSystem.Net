@@ -140,12 +140,13 @@ internal class DiscordCommandService : IHostedService
             Logging.LogError(e.Exception);
 #endif
 
+
         var ex = e.Exception.InnerException ?? e.Exception;
 
+#if DEBUG
         if (e.Context.User.Id == BotConfigModel.AbsoluteAdmin)
-        {
             await Client.SendMessageAsync(await Client.GetChannelAsync(BotConfigModel.DebugChannel), ex.MakeEmbedFromException());
-        }
+#endif
 
         switch (ex)
         {
