@@ -5,6 +5,9 @@ services:
     image: ghcr.io/sombody101/lloydwarningsystem.net:latest  # Specify image name (for watchtower)
     volumes:
       - /mnt/AppStorage/lloyd-bot/configs:/app/configs/ # Config files
+    environment:
+      # Prevents CultureNotFoundException on container start
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
     restart: unless-stopped
 
   # Auto updater
