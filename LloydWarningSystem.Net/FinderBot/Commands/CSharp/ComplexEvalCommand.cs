@@ -33,7 +33,7 @@ public static class ComplexEvalCommand
     }
 
     [Command("cs")]
-    public static async Task EvaluateCSharpAsync(CommandContext ctx, [FromCode] string code)
+    public static async Task EvaluateCSharpAsync(TextCommandContext ctx, [FromCode] string code)
     {
         if (ctx.Channel is not DiscordChannel || ctx.User is not DiscordMember guildUser)
         {
@@ -41,14 +41,12 @@ public static class ComplexEvalCommand
             return;
         }
 
-        var ictx = (TextCommandContext)ctx;
-
         var message = await ctx.Channel
             .SendMessageAsync(embed: new DiscordEmbedBuilder()
                 .WithTitle("REPL Executing")
                 .WithAuthor(ctx.User.Username)
                 .WithColor(DiscordColor.Orange)
-                .WithDescription($"Compiling and Executing [your code]({ictx.Message.JumpLink})...")
+                .WithDescription($"Compiling and Executing [your code]({ctx.Message.JumpLink})...")
                 .Build());
 
         var content = new StringContent(code, Encoding.UTF8, "text/plain");
@@ -63,8 +61,7 @@ public static class ComplexEvalCommand
                 return;
             }
 
-            var responseJson = await response.Content.ReadAsStringAsync();
-            var replResponse = JsonConvert.DeserializeObject<Result>(responseJson);
+            var replResponse = JsonConvert.DeserializeObject<Result>(await response.Content.ReadAsStringAsync());
 
             if (replResponse is null)
             {
@@ -73,7 +70,13 @@ public static class ComplexEvalCommand
             }
 
             var embed = await BuildEmbedAsync(ctx.User, replResponse);
-            await ctx.RespondAsync(embed);
+
+            await message.ModifyAsync(msg =>
+            {
+                msg.Content = null;
+                msg.ClearEmbeds();
+                msg.AddEmbed(embed);
+            });
         }
         catch (HttpRequestException ex)
         {
@@ -81,15 +84,13 @@ public static class ComplexEvalCommand
         }
     }
 
-    private static async Task ModifyOrSendErrorEmbed(string error, CommandContext ctx, DiscordMessage? message = null)
+    private static async Task ModifyOrSendErrorEmbed(string error, TextCommandContext ctx, DiscordMessage? message = null)
     {
-        var ictx = (TextCommandContext)ctx;
-
         var embed = new DiscordEmbedBuilder()
             .WithTitle("REPL Error")
             .WithAuthor(ctx.User.Username)
             .WithColor(DiscordColor.Red)
-            .AddField("Tried to execute", $"[this code]({ictx.Message.JumpLink})")
+            .AddField("Tried to execute", $"[this code]({ctx.Message.JumpLink})")
             .WithDescription(error);
 
         if (message is null)

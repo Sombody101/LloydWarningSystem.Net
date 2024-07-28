@@ -37,6 +37,13 @@ public static class PingCommand
             await ctx.RespondAsync(message);
     }
 
+    [Command("embed"), Description("The same as 'echo', but prints the text in an embed")]
+    public static async Task EchoEmbedAsync(CommandContext ctx, [RemainingText] string message)
+    {
+        if (!string.IsNullOrEmpty(message))
+            await ctx.RespondAsync(new DiscordEmbedBuilder().WithDescription(message));
+    }
+
     public static string FormatTickCount()
     {
         TimeSpan uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();

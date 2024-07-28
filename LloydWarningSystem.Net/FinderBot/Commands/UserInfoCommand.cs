@@ -4,7 +4,6 @@ using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Humanizer;
-using LloydWarningSystem.Net.Context;
 using System.Globalization;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands;
@@ -39,11 +38,9 @@ public static class InfoCommand
         {
             for (int i = 0; i < (sizeof(DiscordUserFlags) * 8); i++)
             {
-                DiscordUserFlags flag = (DiscordUserFlags)(1 << i);
+                var flag = (DiscordUserFlags)(1 << i);
                 if (!user.Flags.Value.HasFlag(flag))
-                {
                     continue;
-                }
 
                 // If the flag isn't documented, Humanize will return an empty string.
                 // When that happens, we'll use the flag bit instead.
@@ -52,16 +49,14 @@ public static class InfoCommand
                 {
                     // For whatever reason, the spammer flag is intentionally
                     // undocumented as "bots will never have a use for it".
-                    displayFlag = i == 20 
-                        ? "Likely spammer" 
+                    displayFlag = i == 20
+                        ? "Likely spammer"
                         : $"1 << {i}";
                 }
 
                 // Capitalize the first letter of the first flag.
                 if (userFlags.Count == 0)
-                {
                     displayFlag = char.ToUpper(displayFlag[0], CultureInfo.InvariantCulture) + displayFlag[1..];
-                }
 
                 userFlags.Add(displayFlag);
             }

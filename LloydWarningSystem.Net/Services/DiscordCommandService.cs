@@ -21,9 +21,9 @@ namespace LloydWarningSystem.Net.Services;
 internal class DiscordCommandService : IHostedService
 {
     public static DiscordCommandService? StaticInstance { get; private set; }
+    public static IDbContextFactory<LloydContext>? DbContextFactory { get; private set; }
 
     public readonly DiscordClient Client;
-    public readonly IDbContextFactory<LloydContext> DbContextFactory;
     public readonly CommandsExtension Commands;
     public DateTime StartTime;
 
@@ -58,7 +58,7 @@ internal class DiscordCommandService : IHostedService
         Commands.CommandErrored += HandleCommandErrored;
 
         // Interactivity
-        InteractivityConfiguration interactivityConfig = new()
+        var interactivityConfig = new InteractivityConfiguration()
         {
             Timeout = TimeSpan.FromMinutes(10),
             PollBehaviour = PollBehaviour.KeepEmojis,
@@ -76,7 +76,7 @@ internal class DiscordCommandService : IHostedService
         Logging.Log("DiscordClientService started");
 
         //Update database to latest migration
-        await using var context = await DbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using var context = await DbContextFactory!.CreateDbContextAsync(cancellationToken);
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
 
         if (pendingMigrations.Any())

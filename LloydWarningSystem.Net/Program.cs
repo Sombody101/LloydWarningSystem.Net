@@ -1,6 +1,11 @@
 ﻿using DSharpPlus;
-using DSharpPlus.Entities;
 using LloydWarningSystem.Net.Configuration;
+using LloydWarningSystem.Net.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
 using Spectre.Console;
 
 namespace LloydWarningSystem.Net;
@@ -22,6 +27,11 @@ internal static class Program
 
     static async Task Main(string[] args)
     {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+            .CreateLogger();
+
         Logging.OverrideConsoleLogging();
         Logging.Log($"Bot start @ {DateTime.Now} ({BuildType} build)");
 
@@ -58,8 +68,10 @@ internal static class Program
             // Start the bot
             await LloydBot.RunAsync();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
+            var e = ex.InnerException ?? ex;
+
             if (e is TaskCanceledException)
                 return;
 
@@ -67,5 +79,21 @@ internal static class Program
             await e.LogToWebhookAsync();
             Environment.Exit(69);
         }
+    }
+
+    /// <summary>
+    /// Used for ECF CLI Migration tools
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    public static IHostBuilder CreateHostBuilder(string[] args)
+    {
+        var builder = Host.CreateDefaultBuilder(args);
+
+        builder.ConfigureServices((_, services) => services.AddDbContextFactory<LloydContext>(
+            options => options.UseSqlite(LloydBot.DbConnectionString)
+        ));
+
+        return builder;
     }
 }

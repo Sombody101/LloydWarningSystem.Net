@@ -8,7 +8,7 @@ namespace LloydWarningSystem.Net.Models;
 
 public class UserDbEntity
 {
-    [Key, Column("id"), DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [Key, Column("id"), DatabaseGenerated(DatabaseGeneratedOption.None)] 
     public ulong Id { get; set; }
 
     [Column("username")]
@@ -19,19 +19,20 @@ public class UserDbEntity
     public List<ReminderDbEntity> Reminders { get; set; }
     public List<VoiceAlert> VoiceAlerts { get; set; }
 
-    public List<MessageAlias> MessageAliases { get; set; }
+    public List<MessageTag> MessageAliases { get; set; }
 
     /// <summary>
     /// Can use special commands
     /// </summary>
     [DefaultValue(false)]
+    [Column("is_bot_admin")]
     public bool IsBotAdmin { get; set; }
 
-    // /// <summary>
-    // /// Used with <see cref="UserReactionCommand"/>
-    // /// </summary>
-    // [DefaultValue(null)]
-    // public string? ReactionEmoji { get; set; }
+    /// <summary>
+    /// Used with <see cref="FinderBot.Commands.UserReactionCommand"/>
+    /// </summary>
+    [Column("reaction_emoji")]
+    public string ReactionEmoji { get; set; }
 }
 
 public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
@@ -56,10 +57,8 @@ public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(x => x.MessageAliases);
-
-        builder.Property(x => x.IsBotAdmin);
-
-        // builder.Property(x => x.ReactionEmoji);
+        builder.HasMany(x => x.MessageAliases)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
     }
 }
