@@ -1,22 +1,28 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.TextCommands;
+using DSharpPlus.Entities;
 using DSharpPlus.Extensions;
+using Humanizer;
 using LloydWarningSystem.Net.Configuration;
 using LloydWarningSystem.Net.Context;
+using LloydWarningSystem.Net.EventHandlers;
+using LloydWarningSystem.Net.Models;
 using LloydWarningSystem.Net.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Spectre.Console;
 using System.Diagnostics;
 
 namespace LloydWarningSystem.Net;
 
 internal static class LloydBot
 {
-    public const string ConnectionString = "Data Source=./configs/lloyd-bot.db";
+    public const string DbConnectionString = "Data Source=./configs/lloyd-bot.db";
 
-    public static IServiceProvider Services;
     public static Stopwatch startWatch;
 
     public static async Task RunAsync()
@@ -40,30 +46,47 @@ internal static class LloydBot
         }
 
         await Host.CreateDefaultBuilder()
-            .ConfigureServices((_, services) =>
+            .UseSerilog()
+            .ConfigureServices((ctx, services) =>
             {
-                services.AddSingleton(config)
-                    .AddDiscordClient(token, TextCommandProcessor.RequiredIntents
-                        | SlashCommandProcessor.RequiredIntents
-                        | DiscordIntents.MessageContents
-                        | DiscordIntents.GuildMembers)
-                    .AddSingleton<DiscordCommandService>()
-                    .AddSingleton(new AllocationRateTracker())
-                    .AddHostedService(s => s.GetRequiredService<DiscordCommandService>())
-                    .AddDbContextFactory<LloydContext>(
-                        options =>
-                        {
-                            Logging.Log("Adding SQLite DB service");
-                            options.UseSqlite(ConnectionString);
-                            options.EnableDetailedErrors();
-                        }
-                    )
-                    .ConfigureEventHandlers(builder =>
-                    {
-                        InitializeEvents(builder);
-                    });
+                services.AddLogging(logging =>
+                {
+                    logging.SetMinimumLevel(LogLevel.Trace)
+                        .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
+                        .AddConsole();
+                });
 
-                Services = services.BuildServiceProvider();
+                services.AddSingleton(config);
+                services.AddSingleton<DiscordCommandService>();
+                services.AddHostedService(s => s.GetRequiredService<DiscordCommandService>());
+
+                services.AddDiscordClient(token, TextCommandProcessor.RequiredIntents
+                    | SlashCommandProcessor.RequiredIntents
+                    | DiscordIntents.MessageContents
+                    | DiscordIntents.GuildMembers);
+
+                services.AddDbContextFactory<LloydContext>(
+                    options =>
+                    {
+                        Logging.Log("Adding SQLite DB service");
+                        options.UseSqlite(DbConnectionString);
+                    }
+                );
+
+                services.AddMemoryCache(options =>
+                {
+                    Logging.WriteOrganizedData("Adding DB memory cache", new() {
+                            { "Compaction", options.CompactionPercentage.ToString() },
+                            { "Scan Freq", options.ExpirationScanFrequency.Humanize() },
+                            { "Cache Limit", options.SizeLimit?.ToString() ?? "No limit found" },
+                    });
+                });
+
+                services.AddSingleton(new AllocationRateTracker());
+                services.ConfigureEventHandlers(builder =>
+                {
+                    InitializeEvents(builder);
+                });
             })
             .RunConsoleAsync();
     }
@@ -74,64 +97,77 @@ internal static class LloydBot
     /// <param name="client"></param>
     private static void InitializeEvents(EventHandlingBuilder cfg)
     {
-        cfg.HandleGuildMemberRemoved(async (client, sender) =>
+        cfg.HandleGuildMemberRemoved(async (client, args) =>
         {
-            await client.SendMessageAsync(sender.Guild.Channels.First().Value,
-                $"{sender.Member.Mention} has left the server!");
+            await client.SendMessageAsync(args.Guild.Channels.First().Value,
+                $"{args.Member.Mention} has left the server!");
         });
 
-        cfg.HandleGuildCreated(async (client, sender) =>
+        cfg.HandleGuildCreated(async (client, args) =>
         {
-            Logging.Log($"Joined guild: {sender.Guild.Name} (id {sender.Guild.Id})");
-            var channel = sender.Guild.Channels[0].Id;
+            Logging.Log($"Joined guild: {args.Guild.Name} (id {args.Guild.Id})");
+            var channel = args.Guild.Channels[0].Id;
             await client.SendMessageAsync(await client.GetChannelAsync(channel), "Hello!\nI'm here to look for fags joining and leaving!");
         });
 
-        return;
-
-        cfg.HandleMessageCreated(async (client, sender) =>
+        cfg.HandleGuildMemberAdded(async (client, args) =>
         {
-#if !DEBUG
-            if (sender.Channel.Id == BotConfigModel.DebugChannel)
-                return; // Not in debug mode, this is the release channel
-#endif
+            // My server
+            if (!Program.DebugBuild && args.Guild.Id == BotConfigModel.DebugGuild)
+            {
+                var channel = await client.GetChannelAsync(1052365936574877820);
+                await channel.SendMessageAsync($"Hey there, {args.Member.Mention}! Welcome to the server! 👋\n\n" +
+                    $"We've got two Lloyd bot instances for you to try:\n* **Testing Ground:** {(await client.GetChannelAsync(1178519504209334323)).Mention} " +
+                    $"- This bot has the latest features but might be a little buggy. 🚧\n* **Stable Bot:** {(await client.GetChannelAsync(1262569946312081488)).Mention} " +
+                    $"- This bot is more stable but might have fewer features. 🤖\n" +
+                    "I've gone ahead and given you the `Bot Tester` role which allows you to send commands in these channels!");
 
-            var message = sender.Message;
+                // Add the 'Bot Tester' role
+                await args.Member.GrantRoleAsync(args.Guild.GetRole(1262519248807264308)!);
+            }
+        });
 
+        cfg.HandleGuildMemberRemoved(async (client, args) =>
+        {
+            // My server
+            if (!Program.DebugBuild && args.Guild.Id == BotConfigModel.DebugGuild)
+            {
+                var channel = await client.GetChannelAsync(1052365936574877820);
+                await channel.SendMessageAsync($"{args.Member.Mention} left the server!\nWhat a fucking fag.");
+            }
+        });
+
+        cfg.HandleMessageCreated(async (client, args) =>
+        {
+            var db = await Shared.TryGetDbContext();
+
+            var message = args.Message;
             if (message.Author is null)
                 return;
 
-            //using var db = dbContextFactory.CreateDbContext();
-            //var user = await db.Users.FindAsync(message.Author.Id);
-            //if (user is null)
-            //    // User is not in DB
-            //    return;
-            //var emoji_str = user.ReactionEmoji;
-            // if (emoji_str is not null)
-            // {
-            //     try
-            //     {
-            //         if (!DiscordEmoji.TryFromName(client, emoji_str, out var emoji))
-            //         {
-            //             Logging.LogError("Failed to locate emoji");
-            //             return;
-            //         }
-            // 
-            //         await message.CreateReactionAsync(emoji);
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         // Don't do anything if an error occurs, there's no point sending something for EVERY message
-            //         AnsiConsole.WriteException(ex);
-            //     }
-            // }
+            var user = await db.Users.FindAsync(message.Author.Id);
+            if (user is null)
+                // User is not in DB
+                return;
 
-            // Check alias
-            // int index;
-            // if ((index = message.Content.IndexOf('$')) != -1)
-            // {
-            //     foreach (var alias in config.)
-            // }
+            // HandleTagEvent.HandleTag(client, args, db);
+
+            var emoji_str = user.ReactionEmoji;
+            if (emoji_str is not null)
+            {
+                try
+                {
+                    if (!DiscordEmoji.TryFromName(client, emoji_str, out var emoji))
+                        Logging.LogError("Failed to locate emoji");
+                    else
+                        await message.CreateReactionAsync(emoji);
+                }
+                catch (Exception ex)
+                {
+                    // Don't do anything if an error occurs, there's no point responding with something for EVERY message
+                    AnsiConsole.WriteException(ex);
+                }
+            }
         });
     }
 }

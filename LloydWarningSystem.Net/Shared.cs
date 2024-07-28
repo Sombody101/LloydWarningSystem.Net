@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.Entities;
+using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.FinderBot.Commands;
-using System.Diagnostics;
-using System.Net;
+using LloydWarningSystem.Net.Services;
 using System.Runtime.InteropServices;
 
 namespace LloydWarningSystem.Net;
 
-internal static class Shared
+internal static partial class Shared
 {
 #if DEBUG
     // Only used in debug builds for the '!restart' command
@@ -58,5 +58,28 @@ internal static class Shared
                 .WithFooter($"From: {sender?.Name ?? "$NO_MODULE_PASSED"}"));
 
         await Program.WebhookClient.BroadcastMessageAsync(webhookBuilder);
+    }
+
+    public static async Task<LloydContext?> TryGetDbContext([Optional] CancellationToken? token)
+    {
+        if (DiscordCommandService.DbContextFactory is null)
+            return null;
+
+        if (token is null)
+            return await DiscordCommandService.DbContextFactory.CreateDbContextAsync();
+
+        return await DiscordCommandService.DbContextFactory.CreateDbContextAsync((CancellationToken)token);
+    }
+
+    public static string GetDisplayName(this DiscordUser user)
+    {
+        if (user is DiscordMember member)
+            return member.DisplayName;
+        else if (!string.IsNullOrEmpty(user.GlobalName))
+            return user.GlobalName;
+        else if (user.Discriminator == "0")
+            return user.Username;
+
+        return $"{user.Username}#{user.Discriminator}";
     }
 }

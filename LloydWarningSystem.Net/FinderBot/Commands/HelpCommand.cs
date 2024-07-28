@@ -103,8 +103,13 @@ public static class HelpCommand
                                 .Append("]\n");
                     }
 
-                    sb.Append('\t').Append(param.ParameterType.Name)
-                        .Append(' ').Append(param.Name).Append(",\n");
+                    sb.Append('\t')
+                        .Append(param.ParameterType.IsPrimitive 
+                            ? param.ParameterType.Name.ToLower() 
+                            : param.ParameterType.Name)
+                        .Append(' ')
+                        .Append(param.Name)
+                        .Append(",\n");
                 }
 
                 embed.AddField("Method Declaration",

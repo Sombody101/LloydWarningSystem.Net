@@ -1,6 +1,5 @@
 ﻿using LloydWarningSystem.Net.Models;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace LloydWarningSystem.Net.Context;
 
@@ -23,14 +22,9 @@ public class LloydContext : DbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LloydContext).Assembly);
 
-        // modelBuilder.Entity<MessageAlias>()
-        //     .Property(e => e.MessageAliasesJson)
-        //     .HasConversion(v => JsonConvert.SerializeObject(v),
-        //                    v => JsonConvert.DeserializeObject<Dictionary<string, string>>(v));
-
         base.OnModelCreating(modelBuilder);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlite(LloydBot.ConnectionString);
+        => optionsBuilder.UseSqlite(LloydBot.DbConnectionString);
 }
