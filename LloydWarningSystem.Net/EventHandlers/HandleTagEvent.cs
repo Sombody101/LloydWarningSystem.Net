@@ -1,18 +1,21 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace LloydWarningSystem.Net.EventHandlers;
 
-internal static class HandleTagEvent
+internal static partial class HandleTagEvent
 {
-    public static void HandleTag(DiscordClient client, MessageCreatedEventArgs args, LloydContext db)
-    {
-        return; // Not in service
+    public static readonly Regex LocateTagRegex = TagRegex();
 
+    public static async Task HandleTag(DiscordClient client, MessageCreatedEventArgs args, LloydContext db)
+    {
         // Check alias
-        var match = MessageTag.LocateTagRegex.Match(args.Message.Content);
+        var match = LocateTagRegex.Match(args.Message.Content);
 
         if (!match.Success)
             return;
@@ -23,8 +26,20 @@ internal static class HandleTagEvent
 
         tag_name = tag_name.Trim().ToLower();
 
-        var tag_content = db.Set<MessageTag>().Select(x => x.Name);
+        var tag = await db.Set<MessageTag>().Where(tag => tag.Name == tag_name && tag.UserId == args.Author.Id)
+            .FirstOrDefaultAsync();
 
+        if (tag is null)
+            return;
 
+        var embed = new DiscordEmbedBuilder()
+            .WithTitle("Tags not fully supported yet!")
+            .WithAuthor(args.Author.Username)
+            .WithDescription($"Here's your tag content for `{tag.Name}`!\n```txt\n{tag.Data}\n```");
+
+        await client.SendMessageAsync(args.Channel, embed);
     }
+
+    [GeneratedRegex(@"\$(\S+)\b")]
+    private static partial Regex TagRegex();
 }
