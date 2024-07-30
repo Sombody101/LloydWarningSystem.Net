@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using LloydWarningSystem.Net.Configuration;
 using LloydWarningSystem.Net.Context;
+using LloydWarningSystem.Net.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

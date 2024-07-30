@@ -15,7 +15,7 @@ public static class InfoCommand
     /// </summary>
     /// <param name="user">Which user to get information about. Leave empty to get information about yourself.</param>
     [Command("user"), TextAlias("member")]
-    public static async Task UserInfoAsync(CommandContext ctx, DiscordUser? user = null)
+    public static async Task GetUserInfo(CommandContext ctx, DiscordUser? user = null)
     {
         user ??= ctx.User;
 
@@ -93,5 +93,19 @@ public static class InfoCommand
         }
 
         await ctx.RespondAsync(embedBuilder);
+    }
+
+    public static async Task GetUserInfo(CommandContext ctx, ulong id)
+    {
+        var user = await ctx.Client.GetUserAsync(id);
+
+        if (user is null)
+        {
+            await ctx.RespondAsync($"Failed to find a user by the ID `{id}`");
+            return;
+        }
+
+        // Pass it off to the big-boy command
+        await GetUserInfo(ctx, user);
     }
 }

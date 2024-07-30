@@ -3,6 +3,7 @@ using System;
 using LloydWarningSystem.Net.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,16 +11,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LloydWarningSystem.Net.Migrations
 {
     [DbContext(typeof(LloydContext))]
-    partial class LloydContextModelSnapshot : ModelSnapshot
+    [Migration("20240730184617_AfkStatusEntityFix")]
+    partial class AfkStatusEntityFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
 
             modelBuilder.Entity("LloydWarningSystem.Net.Models.AfkStatusEntity", b =>
                 {
-                    b.Property<ulong>("Id")
+                    b.Property<ulong>("AfkId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
@@ -37,7 +40,7 @@ namespace LloydWarningSystem.Net.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("AfkId");
 
                     b.HasIndex("UserId")
                         .IsUnique();

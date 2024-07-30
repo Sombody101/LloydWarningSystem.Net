@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -63,22 +64,22 @@ public partial class InfoCommand
         swDb.Stop();
 
         embedBuilder.AddField("DB Latency:", $"{swDb.ElapsedMilliseconds:n0} ms", true);
+        embedBuilder.AddField("DB Size", BytesToString(new FileInfo("./configs/lloyd-bot.db").Length));
 
         int members = await _dbContext.Users.CountAsync();
         int guilds = await _dbContext.Guilds.CountAsync();
 
-        embedBuilder.AddField("Membercount:", $"{members:n0}", true);
-        embedBuilder.AddField("Guildcount:", $"{guilds:n0}", true);
+        embedBuilder.AddField("Member Count:", $"{members:n0}", true);
+        embedBuilder.AddField("Guild Count:", $"{guilds:n0}", true);
 
         StringBuilder stringBuilder = new();
         stringBuilder.Append(ctx.Client.CurrentUser.Mention);
         stringBuilder.Append(", ");
         foreach (string prefix in ((DefaultPrefixResolver)ctx.Extension.GetProcessor<TextCommandProcessor>().Configuration.PrefixResolver.Target!).Prefixes)
         {
-            stringBuilder.Append('`');
-            stringBuilder.Append(prefix);
-            stringBuilder.Append('`');
-            stringBuilder.Append(", ");
+            stringBuilder.Append('`')
+                .Append(prefix)
+                .Append("`, ");
         }
 
         stringBuilder.Append(" `/`");
@@ -90,5 +91,30 @@ public partial class InfoCommand
         responseBuilder.AddEmbed(embedBuilder).AsEphemeral();
 
         await ctx.RespondAsync(responseBuilder);
+    }
+
+    public static string BytesToString(long value)
+    {
+        string suffix;
+        double readable;
+        switch (Math.Abs(value))
+        {
+            case >= 0x40000000:
+                suffix = "GB";
+                readable = value >> 20;
+                break;
+            case >= 0x100000:
+                suffix = "MB";
+                readable = value >> 10;
+                break;
+            case >= 0x400:
+                suffix = "KB";
+                readable = value;
+                break;
+            default:
+                return value.ToString("0 B");
+        }
+
+        return $"{readable / 1024:0.##}{suffix}";
     }
 }

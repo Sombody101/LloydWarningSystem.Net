@@ -8,7 +8,7 @@ using Humanizer;
 
 namespace LloydWarningSystem.Net.EventHandlers;
 
-public sealed class CommandErroredEventHandlers
+public sealed class CommandErroredEventHandler
 {
     public static async Task OnErroredAsync(CommandsExtension _, CommandErroredEventArgs eventArgs)
     {

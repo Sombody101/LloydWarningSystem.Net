@@ -7,13 +7,13 @@ public class RequireOwnerCheck : IContextCheck<RequireBotOwnerAttribute>
 {
     public async ValueTask<string?> ExecuteCheckAsync(RequireBotOwnerAttribute attribute, CommandContext context)
     {
-        if (!await IsAdmin(context))
+        if (!IsOwner(context))
             return "You need to be a bot owner!";
 
         return null;
     }
 
-    public async ValueTask<bool> IsAdmin(CommandContext context)
+    public static bool IsOwner(CommandContext context)
     {
         var app = context.Client.CurrentApplication;
         var me = context.Client.CurrentUser;

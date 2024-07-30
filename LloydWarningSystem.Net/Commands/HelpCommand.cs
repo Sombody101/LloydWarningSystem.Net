@@ -98,14 +98,17 @@ public static class HelpCommand
                     var attributes = param.CustomAttributes;
                     if (attributes.Count() is not 0)
                     {
+                        sb.Append('\n');
+
                         foreach (var attr in attributes.Select(attr => attr.AttributeType))
-                            sb.Append("\n\t[").Append(attr.Name.Replace("Attribute", string.Empty))
+                            sb.Append("\t[")
+                                .Append(attr.Name.Replace("Attribute", string.Empty))
                                 .Append("]\n");
                     }
 
                     sb.Append('\t')
-                        .Append(param.ParameterType.IsPrimitive 
-                            ? param.ParameterType.Name.ToLower() 
+                        .Append(param.ParameterType.IsPrimitive
+                            ? param.ParameterType.Name.ToLower()
                             : param.ParameterType.Name)
                         .Append(' ')
                         .Append(param.Name)
@@ -150,15 +153,31 @@ public static class HelpCommand
                 : name[..spaceIndex];
 
             commandName = commandName.Underscore();
-            foreach (Command command in commands.Where(cmd => cmd.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)))
-                return spaceIndex == -1
-                    ? command
-                    : GetCommand(command.Subcommands, name[(spaceIndex + 1)..]);
+
+            var found_command = commands.FirstOrDefault(cmd => cmd.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+
+            if (found_command is not null)
+            {
+                if (spaceIndex != -1)
+                    return GetCommand(found_command.Subcommands, name[(spaceIndex + 1)..]);
+
+                // Check for default group command
+                if (found_command.Method is null) // Is class
+                {
+                    found_command = found_command.Subcommands.FirstOrDefault(sub =>
+                        sub.Method is not null
+                            && sub.Method.GetCustomAttributes(typeof(DefaultGroupCommandAttribute), false).Length is not 0
+                    );
+
+                    if (found_command is not null)
+                        return found_command;
+                }
+            }
 
             // Search aliases
-            foreach (Command command in commands)
+            foreach (var command in commands)
             {
-                foreach (Attribute attribute in command.Attributes)
+                foreach (var attribute in command.Attributes)
                 {
                     if (attribute is not TextAliasAttribute aliasAttribute)
                         continue;

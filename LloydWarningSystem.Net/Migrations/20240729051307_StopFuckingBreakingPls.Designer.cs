@@ -3,6 +3,7 @@ using System;
 using LloydWarningSystem.Net.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,40 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LloydWarningSystem.Net.Migrations
 {
     [DbContext(typeof(LloydContext))]
-    partial class LloydContextModelSnapshot : ModelSnapshot
+    [Migration("20240729051307_StopFuckingBreakingPls")]
+    partial class StopFuckingBreakingPls
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
-
-            modelBuilder.Entity("LloydWarningSystem.Net.Models.AfkStatusEntity", b =>
-                {
-                    b.Property<ulong>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id");
-
-                    b.Property<long>("AfkEpoch")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("afk_epoch");
-
-                    b.Property<string>("AfkMessage")
-                        .HasMaxLength(70)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("afk_message");
-
-                    b.Property<ulong>("UserId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("AfkStatusEntity");
-                });
 
             modelBuilder.Entity("LloydWarningSystem.Net.Models.GuildConfigDbEntity", b =>
                 {
@@ -356,17 +331,6 @@ namespace LloydWarningSystem.Net.Migrations
                     b.ToTable("VoiceAlerts");
                 });
 
-            modelBuilder.Entity("LloydWarningSystem.Net.Models.AfkStatusEntity", b =>
-                {
-                    b.HasOne("LloydWarningSystem.Net.Models.UserDbEntity", "User")
-                        .WithOne("AfkStatus")
-                        .HasForeignKey("LloydWarningSystem.Net.Models.AfkStatusEntity", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("LloydWarningSystem.Net.Models.GuildConfigDbEntity", b =>
                 {
                     b.HasOne("LloydWarningSystem.Net.Models.GuildDbEntity", "Guild")
@@ -453,8 +417,6 @@ namespace LloydWarningSystem.Net.Migrations
 
             modelBuilder.Entity("LloydWarningSystem.Net.Models.UserDbEntity", b =>
                 {
-                    b.Navigation("AfkStatus");
-
                     b.Navigation("Incidents");
 
                     b.Navigation("MessageAliases");

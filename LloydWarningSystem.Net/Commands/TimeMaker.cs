@@ -1,16 +1,19 @@
 ﻿using DSharpPlus.Commands;
-using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
+using LloydWarningSystem.Net.CommandChecks.Attributes;
 
 namespace LloydWarningSystem.Net.FinderBot.Commands;
 
 public static class TimeMaker
 {
-    [Command("epoch"), SlashCommandTypes]
-    public static async Task EpochCommand(SlashCommandContext ctx)
+    [Command("epoch"), DebugOnly]
+    public static async Task EpochCommand(CommandContext _ctx)
     {
-        string modal_id = GenerateModalId();
+        if (!_ctx.EnsureSlashContext(out var ctx))
+            return;
+
+        string modal_id = Shared.GenerateModalId();
 
         var drop_options = new List<DiscordSelectComponentOption>()
         {
@@ -39,7 +42,6 @@ public static class TimeMaker
             .WithTitle("Epoch Generator")
             .WithCustomId(modal_id)
             .AddComponents(
-                dropdown,
                 new DiscordTextInputComponent("Month", "month", utc_now.Month.ToString(), "0", false),
                 new DiscordTextInputComponent("Day", "day", utc_now.Day.ToString(), "0", false),
                 new DiscordTextInputComponent("Hour", "hour", utc_now.Hour.ToString(), "0", false),
@@ -61,7 +63,4 @@ public static class TimeMaker
         // Generate epoch time
         // ...
     }
-
-    public static string GenerateModalId()
-        => $"modal-{Random.Shared.Next():X4}";
 }

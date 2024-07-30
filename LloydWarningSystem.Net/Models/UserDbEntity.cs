@@ -19,7 +19,9 @@ public class UserDbEntity
     public List<ReminderDbEntity> Reminders { get; set; }
     public List<VoiceAlert> VoiceAlerts { get; set; }
 
-    public List<MessageTag> MessageAliases { get; set; }
+    public List<MessageTag> MessageAliases { get; set; } = [];
+
+    public AfkStatusEntity? AfkStatus { get; set; }
 
     /// <summary>
     /// Can use special commands
@@ -32,7 +34,8 @@ public class UserDbEntity
     /// Used with <see cref="FinderBot.Commands.UserReactionCommand"/>
     /// </summary>
     [Column("reaction_emoji")]
-    public string ReactionEmoji { get; set; }
+    [DefaultValue("")]
+    public string? ReactionEmoji { get; set; }
 }
 
 public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
@@ -59,6 +62,9 @@ public class UserDbEntityConfig : IEntityTypeConfiguration<UserDbEntity>
 
         builder.HasMany(x => x.MessageAliases)
             .WithOne(x => x.User)
-            .HasForeignKey(x => x.UserId);
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.AfkStatus);
     }
 }

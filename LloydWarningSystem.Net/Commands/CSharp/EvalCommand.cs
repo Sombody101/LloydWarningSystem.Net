@@ -157,7 +157,7 @@ public static class EvalCommand
                 await context.Context.EditResponseAsync("Eval was successful with nothing returned.");
                 break;
             case TargetInvocationException error when error.InnerException is not null:
-                await CommandErroredEventHandlers.OnErroredAsync(context.Context.Extension, new()
+                await CommandErroredEventHandler.OnErroredAsync(context.Context.Extension, new()
                 {
                     CommandObject = null,
                     Context = context.Context,
@@ -165,7 +165,7 @@ public static class EvalCommand
                 });
                 break;
             case Exception error:
-                await CommandErroredEventHandlers.OnErroredAsync(context.Context.Extension, new()
+                await CommandErroredEventHandler.OnErroredAsync(context.Context.Extension, new()
                 {
                     CommandObject = null,
                     Context = context.Context,
