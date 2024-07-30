@@ -14,8 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Spectre.Console;
 using System.Diagnostics;
+using System.Text;
 
 namespace LloydWarningSystem.Net;
 
@@ -63,7 +63,8 @@ internal static class LloydBot
                 services.AddDiscordClient(token, TextCommandProcessor.RequiredIntents
                     | SlashCommandProcessor.RequiredIntents
                     | DiscordIntents.MessageContents
-                    | DiscordIntents.GuildMembers);
+                    | DiscordIntents.GuildMembers
+                    | DiscordIntents.GuildEmojisAndStickers);
 
                 services.AddDbContextFactory<LloydContext>(
                     options =>
@@ -139,7 +140,7 @@ internal static class LloydBot
 
         cfg.HandleMessageCreated(async (client, args) =>
         {
-            var db = await Shared.TryGetDbContext();
+            var db = (await Shared.TryGetDbContext())!;
 
             var message = args.Message;
             if (message.Author is null)
@@ -150,10 +151,41 @@ internal static class LloydBot
                 // User is not in DB
                 return;
 
-            // HandleTagEvent.HandleTag(client, args, db);
+            if (!args.Author.IsBot)
+            {
+                var afkUsers = await db.Set<AfkStatusEntity>()
+                                       .Where(x => x.UserId == args.Author.Id
+                                            || args.MentionedUsers.Select(u => u.Id).Contains(x.UserId))
+                                       .ToListAsync();
+                // Check AFK
+                var authorAfk = afkUsers.Find(x => x.UserId == args.Author.Id);
+                if (authorAfk?.IsAfk() == true && args.Message.Content.Length > 5)
+                {
+                    // Message is larger than 5 characters
+                    user.AfkStatus = null;
+                    await db.SaveChangesAsync();
+                    await args.Message.RespondAsync($"Welcome back {args.Author.Mention}!\nI've removed your AFK status.");
+                }
+
+                // Respond with AFK users and when they went AFK
+                if (args.MentionedUsers.Any())
+                {
+                    var sb = new StringBuilder();
+
+                    var afkMentionedUsers = afkUsers.Where(x => x.UserId != args.Author.Id && x.IsAfk());
+                    if (afkMentionedUsers.Any())
+                        foreach (var afkUser in afkMentionedUsers)
+                            sb.AppendLine($"<@{afkUser.UserId}> is afk <t:{afkUser.AfkEpoch}:R>: {afkUser.AfkMessage}");
+
+                    if (sb.Length > 0)
+                        await args.Message.RespondAsync(sb.ToString());
+                }
+            }
+
+            await HandleTagEvent.HandleTag(client, args, db);
 
             var emoji_str = user.ReactionEmoji;
-            if (emoji_str is not null)
+            if (!string.IsNullOrWhiteSpace(emoji_str))
             {
                 try
                 {
@@ -164,8 +196,7 @@ internal static class LloydBot
                 }
                 catch (Exception ex)
                 {
-                    // Don't do anything if an error occurs, there's no point responding with something for EVERY message
-                    AnsiConsole.WriteException(ex);
+                    await ex.PrintException();
                 }
             }
         });

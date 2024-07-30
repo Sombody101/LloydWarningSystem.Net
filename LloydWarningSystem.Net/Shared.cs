@@ -1,12 +1,15 @@
-﻿using DSharpPlus.Entities;
+﻿using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Entities;
 using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.FinderBot.Commands;
 using LloydWarningSystem.Net.Services;
+using Spectre.Console;
 using System.Runtime.InteropServices;
 
 namespace LloydWarningSystem.Net;
 
-internal static partial class Shared
+internal static class Shared
 {
 #if DEBUG
     // Only used in debug builds for the '!restart' command
@@ -15,6 +18,9 @@ internal static partial class Shared
 
     // Runtime constants
     public static readonly DiscordColor DefaultEmbedColor = new(0xFFE4B5);
+
+    public static string GenerateModalId()
+        => $"modal-{Random.Shared.Next():X4}";
 
     public static DiscordEmbedBuilder MakeEmbedFromException(this Exception e)
     {
@@ -45,6 +51,12 @@ internal static partial class Shared
         return embed.WithImageUrl("https://files.forsaken-borders.net/transparent.png");
     }
 
+    public static async Task PrintException(this Exception e, [Optional] Type? sender)
+    {
+        AnsiConsole.WriteException(e);
+        await LogToWebhookAsync(e, sender);
+    }
+
     public static async Task LogToWebhookAsync(this Exception e, object sender)
     {
         await LogToWebhookAsync(e, sender?.GetType() ?? typeof(void));
@@ -55,7 +67,7 @@ internal static partial class Shared
         var webhookBuilder = new DiscordWebhookBuilder()
             .WithUsername($"Lloyd-{Program.BuildType}")
             .AddEmbed(e.MakeEmbedFromException()
-                .WithFooter($"From: {sender?.Name ?? "$NO_MODULE_PASSED"}"));
+                .WithFooter($"From: {sender?.Name ?? "$NO_MODULE_PASSED"}\nUptime: {PingCommand.FormatTickCount()}"));
 
         await Program.WebhookClient.BroadcastMessageAsync(webhookBuilder);
     }
@@ -81,5 +93,20 @@ internal static partial class Shared
             return user.Username;
 
         return $"{user.Username}#{user.Discriminator}";
+    }
+
+    public static bool EnsureSlashContext(this CommandContext context, out SlashCommandContext slash_context)
+    {
+        if (context is SlashCommandContext sctx)
+        {
+            slash_context = sctx;
+            return true;
+        }
+
+        context.RespondAsync("This is only available as a slash command!")
+            .GetAwaiter().GetResult();
+
+        slash_context = null!;
+        return false;
     }
 }

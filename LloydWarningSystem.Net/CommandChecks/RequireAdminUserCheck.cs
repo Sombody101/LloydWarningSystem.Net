@@ -14,11 +14,11 @@ public class RequireAdminUserCheck : IContextCheck<RequireAdminUserAttribute>
         _dbContext = dbContext;
     }
 
-    public async ValueTask<string?> ExecuteCheckAsync(RequireAdminUserAttribute attribute, CommandContext context)
+    public async ValueTask<string?> ExecuteCheckAsync(RequireAdminUserAttribute? _, CommandContext context)
     {
         var user = await _dbContext.Users.FindAsync(context.User.Id);
 
-        if (user is null || !user.IsBotAdmin && !await new RequireOwnerCheck().IsAdmin(context))
+        if (user is null || !user.IsBotAdmin && !RequireOwnerCheck.IsOwner(context))
             return "You need to be a bot administrator!";
 
         return null;
