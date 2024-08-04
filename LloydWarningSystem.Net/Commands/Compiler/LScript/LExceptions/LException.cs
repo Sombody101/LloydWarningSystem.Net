@@ -1,8 +1,8 @@
 ﻿using Antlr4.Runtime;
-using LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
+using LloydWarningSystem.Net.Commands.Compiler.LScript.LRuntime;
 using System.Text;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LExceptions;
+namespace LloydWarningSystem.Net.Commands.Compiler.LScript.LExceptions;
 
 /// <summary>
 /// The base to all exceptions. Allows for a stack trace to be created.

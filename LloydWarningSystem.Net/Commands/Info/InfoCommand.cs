@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LloydWarningSystem.Net.Context;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Info;
+namespace LloydWarningSystem.Net.Commands.Info;
 
 [Command("info"), RequirePermissions(DiscordPermissions.EmbedLinks, DiscordPermissions.None)]
 public sealed partial class InfoCommand

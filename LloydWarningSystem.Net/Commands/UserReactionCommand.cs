@@ -5,7 +5,7 @@ using DSharpPlus.Entities;
 using LloydWarningSystem.Net.Context;
 using System.ComponentModel;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands;
+namespace LloydWarningSystem.Net.Commands;
 
 [Command("react")]
 public class UserReactionCommand

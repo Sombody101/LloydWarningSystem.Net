@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Info;
+namespace LloydWarningSystem.Net.Commands.Info;
 
 public partial class InfoCommand
 {

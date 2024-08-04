@@ -6,7 +6,7 @@ using DSharpPlus.Exceptions;
 using Humanizer;
 using System.Globalization;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Info;
+namespace LloydWarningSystem.Net.Commands.Info;
 
 public partial class InfoCommand
 {

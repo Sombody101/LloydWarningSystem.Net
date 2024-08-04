@@ -5,12 +5,12 @@ namespace LloydWarningSystem.Net.CommandChecks;
 
 public class RequireOwnerCheck : IContextCheck<RequireBotOwnerAttribute>
 {
-    public async ValueTask<string?> ExecuteCheckAsync(RequireBotOwnerAttribute attribute, CommandContext context)
+    public ValueTask<string?> ExecuteCheckAsync(RequireBotOwnerAttribute attribute, CommandContext context)
     {
         if (!IsOwner(context))
-            return "You need to be a bot owner!";
+            return ValueTask.FromResult<string?>("You need to be a bot owner!");
 
-        return null;
+        return ValueTask.FromResult<string?>(null);
     }
 
     public static bool IsOwner(CommandContext context)

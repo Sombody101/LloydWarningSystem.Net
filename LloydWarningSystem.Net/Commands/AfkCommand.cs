@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.Commands;
 using DSharpPlus.Commands.ArgumentModifiers;
+using DSharpPlus.Commands.Exceptions;
 using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using LloydWarningSystem.Net.CommandChecks.Attributes;
@@ -7,6 +8,7 @@ using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.Models;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
+using System.Runtime.InteropServices;
 
 namespace LloydWarningSystem.Net.Commands;
 
@@ -41,40 +43,24 @@ public class AfkCommand
         await ctx.RespondAsync($"I've set your AFK status: {status}");
     }
 
-    [Command("mod"), RequireAdminUser]
-    public class AfkModCommand
+    public async ValueTask ListAfkUsers(CommandContext ctx, [Optional] ulong? guild_id)
     {
-        private readonly LloydContext _dbContext;
+        guild_id ??= ctx.Guild?.Id;
 
-        public AfkModCommand(LloydContext _db)
+        if (guild_id is null)
         {
-            _dbContext = _db;
+            await ctx.RespondAsync("Error fetching guild! Try again later!");
+            return;
         }
 
-        [Command("set")]
-        public async ValueTask ModSetAfkStatusAsync(CommandContext ctx, DiscordUser user, [RemainingText][MinMaxLength(0, 70)] string status)
+        var dbGuild = await _dbContext.Set<GuildDbEntity>().FirstOrDefaultAsync(guild => guild.Id == guild_id);
+
+        if (dbGuild is null)
         {
-            var dbuser = await _dbContext.FindOrCreateUserAsync(user);
-
-            var afkStatus = new AfkStatusEntity()
-            {
-                AfkEpoch = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                AfkMessage = status,
-            };
-
-            dbuser.AfkStatus = afkStatus;
-            await _dbContext.SaveChangesAsync();
-            await ctx.RespondAsync($"I've set {user.Mention}'s AFK status: {status}");
+            await ctx.RespondAsync("That guild is not in my database!\nAm I a member of it?");
+            return;
         }
 
-        [Command("clear"), TextAlias("unset")]
-        public async ValueTask ModClearAfkStatusAsync(CommandContext ctx, DiscordUser user)
-        {
-            var dbuser = await _dbContext.FindOrCreateUserAsync(user);
-
-            dbuser.AfkStatus = null;
-            await _dbContext.SaveChangesAsync();
-            await ctx.RespondAsync($"I've cleared {user.Mention}'s AFK status.");
-        }
+        // var afkUsers = _dbContext.Set<UserDbEntity>().Where(user => user.Id == dbGuild.);
     }
 }

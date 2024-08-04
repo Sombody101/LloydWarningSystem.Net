@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Info;
+namespace LloydWarningSystem.Net.Commands.Info;
 
 public partial class InfoCommand
 {

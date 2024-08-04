@@ -1,15 +1,13 @@
-﻿using DSharpPlus.Commands;
-using DSharpPlus.Commands.Processors.SlashCommands;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
+using LloydWarningSystem.Net.Commands;
 using LloydWarningSystem.Net.Context;
-using LloydWarningSystem.Net.FinderBot.Commands;
 using LloydWarningSystem.Net.Services;
 using Spectre.Console;
 using System.Runtime.InteropServices;
 
 namespace LloydWarningSystem.Net;
 
-internal static class Shared
+public static class Shared
 {
 #if DEBUG
     // Only used in debug builds for the '!restart' command
@@ -45,7 +43,7 @@ internal static class Shared
 
     public static DiscordEmbedBuilder MakeWide(this DiscordEmbedBuilder embed)
     {
-        if (embed.ImageUrl is not null or "")
+        if (embed.ImageUrl is not null)
             throw new ArgumentException("Embed already has an image set; Cannot add wide image.");
 
         return embed.WithImageUrl("https://files.forsaken-borders.net/transparent.png");
@@ -93,20 +91,5 @@ internal static class Shared
             return user.Username;
 
         return $"{user.Username}#{user.Discriminator}";
-    }
-
-    public static bool EnsureSlashContext(this CommandContext context, out SlashCommandContext slash_context)
-    {
-        if (context is SlashCommandContext sctx)
-        {
-            slash_context = sctx;
-            return true;
-        }
-
-        context.RespondAsync("This is only available as a slash command!")
-            .GetAwaiter().GetResult();
-
-        slash_context = null!;
-        return false;
     }
 }

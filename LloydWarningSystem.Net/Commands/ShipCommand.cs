@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands;
+namespace LloydWarningSystem.Net.Commands;
 
 public static class ShipCommand
 {

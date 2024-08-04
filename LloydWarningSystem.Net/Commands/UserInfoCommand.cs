@@ -6,7 +6,7 @@ using DSharpPlus.Exceptions;
 using Humanizer;
 using System.Globalization;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands;
+namespace LloydWarningSystem.Net.Commands;
 
 public static class InfoCommand
 {
@@ -86,11 +86,11 @@ public static class InfoCommand
             ? string.Join('\n', member.Roles.OrderByDescending(role => role.Position).Select(role => $"- {role.Mention}"))
             : "None", false);
 
+        embedBuilder.AddField("Server Rank", member.Hierarchy.ToString());
+
         // If the user has a color, set it.
         if (!member.Color.Equals(default(DiscordColor)))
-        {
             embedBuilder.Color = member.Color;
-        }
 
         await ctx.RespondAsync(embedBuilder);
     }

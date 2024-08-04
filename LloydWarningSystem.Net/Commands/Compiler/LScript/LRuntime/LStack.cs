@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
+namespace LloydWarningSystem.Net.Commands.Compiler.LScript.LRuntime;
 
 internal sealed class LStackContext
 {

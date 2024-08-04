@@ -3,6 +3,7 @@ using System;
 using LloydWarningSystem.Net.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LloydWarningSystem.Net.Migrations
 {
     [DbContext(typeof(LloydContext))]
-    partial class LloydContextModelSnapshot : ModelSnapshot
+    [Migration("20240801204651_TrackingDbCreate")]
+    partial class TrackingDbCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
@@ -305,7 +308,7 @@ namespace LloydWarningSystem.Net.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("items_flagged");
 
-                    b.Property<long>("CreationEpoch")
+                    b.Property<ulong>("CreationEpoch")
                         .HasColumnType("INTEGER")
                         .HasColumnName("creation_epoch");
 

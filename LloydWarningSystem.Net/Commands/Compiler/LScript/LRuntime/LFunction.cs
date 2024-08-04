@@ -1,6 +1,6 @@
 ﻿using static System.Formats.Asn1.AsnWriter;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
+namespace LloydWarningSystem.Net.Commands.Compiler.LScript.LRuntime;
 
 internal sealed class LFunction
 {

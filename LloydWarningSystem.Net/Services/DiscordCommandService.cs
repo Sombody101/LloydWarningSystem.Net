@@ -47,7 +47,7 @@ internal class DiscordCommandService : IHostedService
         };
 
         Commands = Client.UseCommands(commandsConfiguration);
-        _ = Commands.AddProcessorsAsync(new TextCommandProcessor(new TextCommandConfiguration()
+        Commands.AddProcessors(new TextCommandProcessor(new TextCommandConfiguration()
         {
             PrefixResolver = new DefaultPrefixResolver(true, config.CommandPrefixes.ToArray()).ResolvePrefixAsync,
         }));
@@ -117,12 +117,6 @@ internal class DiscordCommandService : IHostedService
             AnsiConsole.WriteException(ex);
             await ex.LogToWebhookAsync();
         }
-
-#if !DEBUG
-        Logging.Log("Starting Minecraft Logging Service"); // But really isn't a service
-        var sender = new RandomMinecraftSender(Client);
-        _ = sender.StartSendingMessages();
-#endif
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -139,7 +133,6 @@ internal class DiscordCommandService : IHostedService
 #else
             Logging.LogError(e.Exception);
 #endif
-
 
         var ex = e.Exception.InnerException ?? e.Exception;
 

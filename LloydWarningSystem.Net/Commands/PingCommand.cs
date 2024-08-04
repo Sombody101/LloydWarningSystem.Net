@@ -4,7 +4,7 @@ using DSharpPlus.Entities;
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands;
+namespace LloydWarningSystem.Net.Commands;
 
 public static class PingCommand
 {
