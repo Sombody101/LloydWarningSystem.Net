@@ -4,7 +4,7 @@ using DSharpPlus.Commands.Trees.Metadata;
 using DSharpPlus.Entities;
 using Humanizer;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands;
+namespace LloydWarningSystem.Net.Commands;
 
 [Command("humanize")]
 public static class HumanizerCommand

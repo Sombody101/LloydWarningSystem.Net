@@ -3,7 +3,7 @@ using DSharpPlus.Entities;
 using LloydWarningSystem.Net.Configuration;
 using System.ComponentModel;
 
-namespace LloydWarningSystem.Net.FinderBot;
+namespace LloydWarningSystem.Net.Commands;
 
 public static class RandomNsfwCommands
 {

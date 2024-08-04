@@ -20,7 +20,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Text;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.CSharp;
+namespace LloydWarningSystem.Net.Commands.CSharp;
 
 public static class EvalCommand
 {

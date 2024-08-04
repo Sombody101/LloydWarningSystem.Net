@@ -6,7 +6,7 @@ using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands;
+namespace LloydWarningSystem.Net.Commands;
 
 [Command("alias")]
 public class AliasManagerCommand

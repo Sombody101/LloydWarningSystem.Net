@@ -10,7 +10,7 @@ using Humanizer;
 using System.ComponentModel;
 using System.Text;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands;
+namespace LloydWarningSystem.Net.Commands;
 
 public static class HelpCommand
 {

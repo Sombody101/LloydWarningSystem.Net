@@ -1,7 +1,7 @@
 ﻿using Antlr4.Runtime.Misc;
 using DSharpPlus.Commands;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
+namespace LloydWarningSystem.Net.Commands.Compiler.LScript.LRuntime;
 
 internal class LScriptRuntime : LScriptParserBaseVisitor<string>
 {

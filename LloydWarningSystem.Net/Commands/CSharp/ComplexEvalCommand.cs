@@ -3,6 +3,7 @@ using DSharpPlus.Commands.ArgumentModifiers;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Entities;
 using Humanizer;
+using LloydWarningSystem.Net.CommandChecks.Attributes;
 using LloydWarningSystem.Net.Configuration;
 using Newtonsoft.Json;
 using System.Net;
@@ -11,7 +12,7 @@ using System.Text.RegularExpressions;
 
 using Formatter = DSharpPlus.Formatter;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.CSharp;
+namespace LloydWarningSystem.Net.Commands.CSharp;
 
 public static class ComplexEvalCommand
 {
@@ -32,7 +33,7 @@ public static class ComplexEvalCommand
         public string ReturnTypeName { get; set; }
     }
 
-    [Command("cs")]
+    [Command("cs"), RequireAdminUser]
     public static async Task EvaluateCSharpAsync(TextCommandContext ctx, [FromCode] string code)
     {
         if (ctx.Channel is not DiscordChannel || ctx.User is not DiscordMember guildUser)

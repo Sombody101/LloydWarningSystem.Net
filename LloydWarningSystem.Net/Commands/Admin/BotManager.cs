@@ -6,9 +6,8 @@ using LloydWarningSystem.Net.Configuration;
 using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.Models;
 using System.ComponentModel;
-using System.Diagnostics;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Admin;
+namespace LloydWarningSystem.Net.Commands.Admin;
 
 public class BotManager
 {
@@ -77,7 +76,7 @@ public class BotManager
         }
         else
         {
-            await ctx.RespondAsync($"{dis_user.Username} wasn't already an administrator!");
+            await ctx.RespondAsync($"{dis_user.Username} wasn't an administrator!");
             return;
         }
 
@@ -109,7 +108,7 @@ public class BotManager
     [Command("addprefix"),
         Description("Adds a prefix to the bots configuration (requires restart)."),
         RequireAdminUser]
-    public async Task AddPrefixAsync(CommandContext ctx, params string[] prefixes)
+    public static async Task AddPrefixAsync(CommandContext ctx, params string[] prefixes)
     {
         var config = ConfigManager.BotConfig;
 
@@ -120,7 +119,7 @@ public class BotManager
                 config.CommandPrefixes.Add(prefix);
 
         await ConfigManager.SaveBotConfig();
-        await ctx.RespondAsync($"Added {prefixes.Length} prefix{"es".Pluralize(prefixes.Length != 1)}");
+        await ctx.RespondAsync($"Added {prefixes.Length} prefix{"es".Pluralize(prefixes.Length != 1)}.\nChanges will be installed on next restart.");
     }
 
     [Command("restart"),

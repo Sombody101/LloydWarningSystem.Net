@@ -1,8 +1,8 @@
 ﻿using Antlr4.Runtime;
 using DSharpPlus.Commands;
-using LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LExceptions;
+using LloydWarningSystem.Net.Commands.Compiler.LScript.LExceptions;
 
-namespace LloydWarningSystem.Net.FinderBot.Commands.Compiler.LScript.LRuntime;
+namespace LloydWarningSystem.Net.Commands.Compiler.LScript.LRuntime;
 
 internal sealed class RuntimeMemory
 {
