@@ -9,6 +9,7 @@ using LloydWarningSystem.Net.Context;
 using LloydWarningSystem.Net.EventHandlers;
 using LloydWarningSystem.Net.Models;
 using LloydWarningSystem.Net.Services;
+using LloydWarningSystem.Net.Services.RegexServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,7 +24,9 @@ internal static class LloydBot
 {
     public const string DbConnectionString = "Data Source=./configs/lloyd-bot.db";
 
-    public static Stopwatch startWatch;
+    public static IServiceProvider Services { get; private set; }
+
+    public static Stopwatch startWatch { get; private set; }
 
     public static async Task RunAsync()
     {
@@ -84,10 +87,17 @@ internal static class LloydBot
                 });
 
                 services.AddSingleton(new AllocationRateTracker());
+
+                // Tracking regex cache and service
+                services.AddScoped<IRegexCache, RegexCache>();
+                services.AddScoped<IRegexService, RegexService>();
+
                 services.ConfigureEventHandlers(builder =>
                 {
                     InitializeEvents(builder);
                 });
+
+                Services = services.BuildServiceProvider();
             })
             .RunConsoleAsync();
     }
@@ -98,6 +108,11 @@ internal static class LloydBot
     /// <param name="client"></param>
     private static void InitializeEvents(EventHandlingBuilder cfg)
     {
+        cfg.HandleModalSubmitted(async (client, sender) =>
+        {
+            await sender.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
+        });
+
         cfg.HandleGuildMemberRemoved(async (client, args) =>
         {
             await client.SendMessageAsync(args.Guild.Channels.First().Value,
@@ -153,13 +168,17 @@ internal static class LloydBot
 
             if (!args.Author.IsBot)
             {
+                // Tracking service
+                await Services.GetRequiredService<IRegexService>().UseRegexAsync(args.Guild.Id, args.Channel.Id, args.Message);
+
                 var afkUsers = await db.Set<AfkStatusEntity>()
-                                       .Where(x => x.UserId == args.Author.Id
-                                            || args.MentionedUsers.Select(u => u.Id).Contains(x.UserId))
-                                       .ToListAsync();
+                    .Where(x => x.UserId == args.Author.Id
+                         || args.MentionedUsers.Select(u => u.Id).Contains(x.UserId))
+                    .ToListAsync();
+
                 // Check AFK
                 var authorAfk = afkUsers.Find(x => x.UserId == args.Author.Id);
-                if (authorAfk?.IsAfk() == true && args.Message.Content.Length > 5)
+                if (authorAfk.IsAfk() && args.Message.Content.Length > 5)
                 {
                     // Message is larger than 5 characters
                     user.AfkStatus = null;
@@ -175,12 +194,21 @@ internal static class LloydBot
                     var afkMentionedUsers = afkUsers.Where(x => x.UserId != args.Author.Id && x.IsAfk());
                     if (afkMentionedUsers.Any())
                         foreach (var afkUser in afkMentionedUsers)
-                            sb.AppendLine($"<@{afkUser.UserId}> is afk <t:{afkUser.AfkEpoch}:R>: {afkUser.AfkMessage}");
+                            sb.AppendLine($"<@{afkUser.UserId}> went afk <t:{afkUser.AfkEpoch}:R>: {afkUser.AfkMessage}");
 
                     if (sb.Length > 0)
                         await args.Message.RespondAsync(sb.ToString());
                 }
             }
+
+            cfg.HandleGuildAvailable(async (client, sender) =>
+            {
+                await Services.GetRequiredService<IRegexService>().RefreshCacheAsync(sender.Guild.Id);
+            });
+
+            cfg.HandleZombied(async (client, args) => await client.ReconnectAsync());
+
+            cfg.HandleGuildAvailable(async (client, args) => Logging.Log($"Guild available: {args.Guild.Name}"));
 
             await HandleTagEvent.HandleTag(client, args, db);
 

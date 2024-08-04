@@ -23,6 +23,8 @@ public class GuildDbEntity
     public List<IncidentDbEntity> Incidents { get; set; }
 
     public List<QuoteDbEntity> Quotes { get; set; }
+
+    public List<TrackingDbEntity> TrackingConfigurations { get; set; }
 }
 
 public class GuildDbEntityConfig : IEntityTypeConfiguration<GuildDbEntity>
